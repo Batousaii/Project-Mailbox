@@ -1,4 +1,4 @@
-EE-Reliability 1.7.0 — update van de bestaande installatie
+EE-Reliability 1.7.1 — update van de bestaande installatie
 
 Gebruik:
 1. Pak deze ZIP volledig uit.
@@ -52,3 +52,11 @@ login-startup zijn hier niet live gevalideerd. Dit pakket is daarom geen
 bewijs van een volledig operationele oplevering op jouw pc. De updater
 controleert de beschikbare echte prerequisites en eerste scan op de doel-pc;
 een echte forwarding- en login-test blijven afzonderlijke acceptatiechecks.
+
+Nieuw in 1.7.1: afgerond werk en status-only zonder nieuwe actie onderdrukken
+forwarding, ook bij Hamza. Een expliciet nieuw verzoek blijft beoordeeld.
+Qwen krijgt expliciete intentie- en bewijsvelden; korte duidelijke afrondingen
+worden zonder AI afgehandeld. Geen automatische sluiting van eerdere
+werkitems: zo wordt geen volledige dossierafhandeling verzonnen. Historisch
+verkeer, SENT en UNKNOWN blijven behouden. Reeds klaargezette, nooit
+verzonden mails worden eenmaal opnieuw beoordeeld onder de nieuwe regels.

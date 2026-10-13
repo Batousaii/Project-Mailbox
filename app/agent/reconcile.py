@@ -16,7 +16,7 @@ from .rules import (Decision, decide_forward, has_hamza_category,
 
 COLUMNS = [
     'EntryID', 'ReceivedUTC', 'Subject', 'OutlookCategories', 'HamzaCategory',
-    'Classification', 'Domain', 'PlanType', 'PlanTarget', 'Confidence',
+    'Classification', 'MessageIntent', 'IntentEvidence', 'Domain', 'PlanType', 'PlanTarget', 'Confidence',
     'EvidenceFromLatestMessage', 'Reason', 'ReviewRequired',
     'ConversationID', 'WorkRequestKey', 'ExistingAgentStatus',
     'ExistingAgentDecision', 'HistoricalBatchOutcome', 'AlreadySent', 'Error',
@@ -94,7 +94,8 @@ def _one(msg, gateway, previous, history, classify):
         'EntryID': msg['entry_id'], 'ReceivedUTC': msg.get('received',''),
         'Subject': msg.get('subject',''), 'OutlookCategories': cats,
         'HamzaCategory': 'YES' if hamza else 'NO',
-        'Classification': outcome,
+        'Classification': outcome, 'MessageIntent': decision.message_intent,
+        'IntentEvidence': decision.intent_evidence,
         'Domain': decision.domain, 'PlanType': decision.plan_type,
         'PlanTarget': decision.plan_target, 'Confidence': decision.confidence,
         'EvidenceFromLatestMessage': decision.evidence,
@@ -187,7 +188,7 @@ def audit_full(data_root, gateway, classify=None, output=None, snapshot=None):
             print(f'[{i}/{len(snapshot)}] {row["Classification"]} | Hamza={row["HamzaCategory"]} | '
                   f'{row["Subject"][:95]}', flush=True)
     summary = {
-        'version':'1.7.0',
+        'version':'1.7.1',
         'audit_finished_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds'),
         'scope':'EE-Reliability / Inbox / MailItems only',
         'snapshot_inbox_count':len(snapshot),

@@ -12,7 +12,7 @@ TARGET_MAILBOX = 'EE-Reliability'
 RECIPIENT = 'hamza.elmakhtari@kuraray.com'
 MODEL = 'qwen3:4b'
 MIN_CONFIDENCE_EXCLUSIVE = 0.80
-POLICY_VERSION = '1.7.0'
+POLICY_VERSION = '1.7.1'
 
 _QUOTE_LINES = [
     re.compile(r'^\s*-{2,}\s*(?:original message|oorspronkelijk bericht)\s*-{2,}', re.I),
@@ -114,6 +114,22 @@ class Decision:
     plan_target: str = ''
     domain: str = 'UNCLEAR'
     evidence: str = ''
+    message_intent: str = 'UNSPECIFIED'
+    intent_evidence: str = ''
+
+
+_COMPLETED = re.compile(r'\b(?:is|zijn|werd|werden|hebben|heb|has been|have been|was|were)\s+(?:(?:reeds|al|inmiddels|succesvol|successfully|already)\s+)*(?:uitgevoerd|afgerond|voltooid|aangemaakt|aangepast|bijgewerkt|completed|performed|finished|created|updated)\b|\b(?:werk|werkzaamheden|job|work|task)\s+(?:is\s+)?(?:klaar|gereed|done)\b', re.I)
+_OPEN_ACTION = re.compile(r'\b(?:graag|gelieve|please|kun\s+je|kan\s+je|kunt\s+u|can\s+you|could\s+you|moet\w*|nog|niet|not|still|pending|openstaand\w*|verzoek\w*|vraag\w*|request\w*)\b|\?', re.I)
+_DIRECT_ACTION = re.compile(r'(?:^|[.!?;,\n])\s*(?:maak|pas|wijzig|voeg|controleer|kalibreer|bestel|vervang|stuur|create|modify|update|check|calibrate|order|replace|send)\b', re.I)
+
+
+def completed_notice(latest):
+    """Cheap, deliberately narrow completion gate; ambiguity goes to the model."""
+    text = (latest or '').strip()
+    if len(text) <= 800 and _COMPLETED.search(text) and not _OPEN_ACTION.search(text) and not _DIRECT_ACTION.search(text):
+        return Decision(confidence=1.0, reason='Uitgevoerd werk; geen nieuw verzoek in nieuwste boodschap',
+                        message_intent='COMPLETED', intent_evidence=text[:350])
+    return None
 
 
 def decode_classification(raw):
@@ -138,6 +154,10 @@ def decode_classification(raw):
         if work != (subtype != 'NONE'):
             raise ValueError('Plan subtype/work request inconsistent')
         evidence = str(raw.get('evidence', '')).strip()[:350]
+        intent = str(raw.get('message_intent', 'UNSPECIFIED')).upper()
+        if intent not in ('UNSPECIFIED', 'ACTION_REQUIRED', 'COMPLETED', 'STATUS_ONLY', 'UNCLEAR'):
+            raise ValueError('Unknown message intent')
+        intent_evidence = str(raw.get('intent_evidence', '')).strip()[:350]
         review = bool(raw.get('review_required', False)) or conf <= MIN_CONFIDENCE_EXCLUSIVE
         if (ei or work) and not evidence:
             review = True
@@ -146,13 +166,21 @@ def decode_classification(raw):
         if ei and not work and domain != 'EI':
             review = True
         return Decision(ei, subtype, work, conf, str(raw.get('reason', '')).strip()[:800],
-                        review, str(raw.get('plan_target', '')).strip()[:180], domain, evidence)
+                        review, str(raw.get('plan_target', '')).strip()[:180], domain, evidence,
+                        intent, intent_evidence)
     except (ValueError, TypeError, KeyError) as exc:
         return Decision(reason=f'REVIEW_REQUIRED: ongeldig modelantwoord ({exc})', review_required=True)
 
 
 def ground_decision(cls, subject, latest):
     """Validate claimed evidence belongs to the NEW text, not quote history."""
+    if cls.message_intent in ('COMPLETED', 'STATUS_ONLY'):
+        if (cls.review_required or cls.confidence <= MIN_CONFIDENCE_EXCLUSIVE or
+                len(cls.intent_evidence) < 6 or _normalize(cls.intent_evidence) not in _normalize(latest) or
+                cls.work_requested or cls.ei_relevant or _DIRECT_ACTION.search(latest)):
+            return replace(cls, message_intent='UNCLEAR', review_required=True,
+                           reason='REVIEW_REQUIRED: status/afronding niet eenduidig onderbouwd')
+        return cls
     if cls.review_required or (not cls.ei_relevant and not cls.work_requested):
         return cls
     if not latest.strip() or len(cls.evidence.strip()) < 6 or _normalize(cls.evidence) not in _normalize(latest):
@@ -180,6 +208,10 @@ def decide_forward(categories, system_message, cls):
     """Category is a real Outlook property; only supported E&I/plan intents pass."""
     if system_message:
         return 'SUPPRESS_SYSTEM_HAMZA' if has_hamza_category(categories) else 'SUPPRESS_SYSTEM'
+    if cls is not None and cls.message_intent in ('COMPLETED', 'STATUS_ONLY') and not cls.review_required:
+        return 'SUPPRESS_' + cls.message_intent
+    if cls is not None and cls.message_intent == 'UNCLEAR' and cls.intent_evidence and cls.review_required:
+        return 'REVIEW_REQUIRED'
     if has_hamza_category(categories):
         return 'SEND_HAMZA'
     if cls is None or cls.review_required:

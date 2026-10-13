@@ -12,7 +12,7 @@ import uuid
 
 from . import ai
 from .visible_inbox import VisibleInboxGateway as OutlookGateway
-from .rules import Decision, RECIPIENT, decide_forward, has_hamza_category, is_system_message, split_latest_message
+from .rules import Decision, RECIPIENT, completed_notice, decide_forward, has_hamza_category, is_system_message, split_latest_message
 from .state import State, data_dir, utc_now
 
 LOG = logging.getLogger('ee_reliability')
@@ -122,6 +122,13 @@ def _scan(st, gw, allow_send=True):
                 st.db.commit()
             system = is_system_message(msg['subject'], details['message_class'], details['headers'], details['body'])
             latest, context = split_latest_message(details['body'])
+            completed = completed_notice(latest) if not system else None
+            if completed is not None:
+                if deferred:
+                    st.complete_deferred_plan(msg['entry_id'], completed)
+                else:
+                    st.classify(msg['entry_id'], decide_forward(msg['categories'], False, completed), completed, False)
+                continue
             if deferred:
                 if ai_unavailable:
                     continue

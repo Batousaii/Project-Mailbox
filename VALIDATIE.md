@@ -49,3 +49,15 @@ zonder traceback op stderr. PowerShell behandelt dat als wachten, niet als
 installatiefout. Drie nieuwe subprocess-tests controleren ontbrekende status,
 onvoltooide/eerste geslaagde scan, echte scanfout en beschadigde status.
 54 agenttests en 3 updatertests slagen. PowerShell zelf is hier niet uitgevoerd.
+
+
+1.7.1: de latere gebruikersinstructie maakt afronding/status zonder nieuwe actie
+een uitzondering op de oorspronkelijke altijd-Hamza-regel. Nieuwe tests
+controleren afgerond roostervloerenwerk met/zonder Hamza, negatie, geciteerde
+oude opdracht, gemengd afgerond/nieuw werk, letterlijke modelonderbouwing
+en onzekere statusclaims. Het echte roostervloerenbericht is niet aangeleverd;
+de exacte oorzaak van de vroegere verzending is dus niet vastgesteld.
+59 agenttests en 3 updatertests slagen. De vorige 1.7.0-run is door de
+aangeleverde Windows-uitvoer bevestigd als RUNNING met geslaagde scan en
+forwarding enabled; nieuwe classificaties en modelkwaliteit moeten nog
+op Windows met echte berichten gevalideerd worden.

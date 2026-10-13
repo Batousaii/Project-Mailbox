@@ -1,3 +1,8 @@
+test_completed_claim_with_direct_new_request_requires_review (test_completion.CompletionTests.test_completed_claim_with_direct_new_request_requires_review) ... ok
+test_completed_even_with_hamza_no_ai_send_or_work_item (test_completion.CompletionTests.test_completed_even_with_hamza_no_ai_send_or_work_item) ... ok
+test_completed_with_new_action_not_suppressed (test_completion.CompletionTests.test_completed_with_new_action_not_suppressed) ... ok
+test_model_status_only_with_literal_evidence_no_hamza_forward (test_completion.CompletionTests.test_model_status_only_with_literal_evidence_no_hamza_forward) ... ok
+test_quoted_old_request_does_not_reopen_done_work (test_completion.CompletionTests.test_quoted_old_request_does_not_reopen_done_work) ... ok
 test_absent_old_agent_needs_no_backup (test_legacy.LegacyBackupTests.test_absent_old_agent_needs_no_backup) ... ok
 test_non_folder_stops_without_modifying (test_legacy.LegacyBackupTests.test_non_folder_stops_without_modifying) ... ok
 test_verified_snapshot_retains_original_and_all_audits (test_legacy.LegacyBackupTests.test_verified_snapshot_retains_original_and_all_audits) ... ok
@@ -32,7 +37,7 @@ test_hamza_overrides_llm_outage_and_system_mail_not_forwarded (test_reconcile_v1
 test_individual_detail_error_report_not_complete (test_reconcile_v16.ReconcileTests.test_individual_detail_error_report_not_complete) ... ok
 test_ai_failure_does_not_starve_later_hamza_and_one_ai_attempt (test_reliability.ReliabilityTests.test_ai_failure_does_not_starve_later_hamza_and_one_ai_attempt) ... Classification failed first
 Traceback (most recent call last):
-  File "/workspace/deliverables/EE-Reliability-Improved/app/agent/runner.py", line 147, in _scan
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 154, in _scan
     cls = ai.classify(msg['subject'], latest, context)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
@@ -46,7 +51,7 @@ Traceback (most recent call last):
 RuntimeError: offline
 Classification failed third
 Traceback (most recent call last):
-  File "/workspace/deliverables/EE-Reliability-Improved/app/agent/runner.py", line 145, in _scan
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 152, in _scan
     raise RuntimeError('AI unavailable in this scan; deferred until retry')
 RuntimeError: AI unavailable in this scan; deferred until retry
 ok
@@ -60,7 +65,7 @@ test_plan_plus_false_ei_claim_does_not_forward_mechanical_plan (test_reliability
 test_release_even_after_failure_and_unchanged_messages_not_classified (test_reliability.ReliabilityTests.test_release_even_after_failure_and_unchanged_messages_not_classified) ... ok
 test_unknown_send_not_retried_after_restart (test_reliability.ReliabilityTests.test_unknown_send_not_retried_after_restart) ... UNKNOWN send outcome one
 Traceback (most recent call last):
-  File "/workspace/deliverables/EE-Reliability-Improved/app/agent/runner.py", line 78, in send_one
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 78, in send_one
     gw.forward(row['entry_id'], row['store_id'], RECIPIENT, token)
   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
     return self._mock_call(*args, **kwargs)
@@ -71,7 +76,7 @@ Traceback (most recent call last):
   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1204, in _execute_mock_call
     result = effect(*args, **kwargs)
              ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/workspace/deliverables/EE-Reliability-Improved/app/tests/test_reliability.py", line 100, in ambiguous
+  File "/workspace/Project-Mailbox/app/tests/test_reliability.py", line 100, in ambiguous
     raise RuntimeError('Disconnected after submission')
 RuntimeError: Disconnected after submission
 ok
@@ -97,14 +102,14 @@ test_reusing_snapshot_no_second_lookups_or_sends (test_visible_inbox_v161.Visibl
 test_uses_only_visible_store_no_recipient_resolve_or_logon (test_visible_inbox_v161.VisibleInboxTests.test_uses_only_visible_store_no_recipient_resolve_or_logon) ... ok
 
 ----------------------------------------------------------------------
-Ran 54 tests in 0.219s
+Ran 59 tests in 0.251s
 
 OK
 NORMAL_FORWARDING_DISABLED; previous_approval=1
 FORWARDING=ENABLED
 NORMAL_FORWARDING_DISABLED; previous_approval=1
 NORMAL_FORWARDING_DISABLED; previous_approval=1
-BACKUP_VERIFIED=/tmp/tmpvm70k46c/data/backups/policy_v15_20261012-132730-861296.db
+BACKUP_VERIFIED=/tmp/tmp9j9q_qg7/data/backups/policy_v15_20261013-063351-223999.db
 {"historical_unsent_quarantined": 1, "historical_ambiguous_no_retry": 1, "normal_queued_for_reclassification": 1, "historical_unscanned_blocked": 1}
-HISTORICAL_AUDIT_CSV=/tmp/tmpvm70k46c/data/historical_v15_previous_forwards_AUDIT.csv
+HISTORICAL_AUDIT_CSV=/tmp/tmp9j9q_qg7/data/historical_v15_previous_forwards_AUDIT.csv
 FORWARDING=ENABLED

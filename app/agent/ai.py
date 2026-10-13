@@ -23,6 +23,17 @@ Antwoord UITSLUITEND als JSON met exact:
   confidence: 0..1
   review_required: boolean
   reason: korte Nederlandstalige verklaring
+  message_intent: ACTION_REQUIRED | COMPLETED | STATUS_ONLY | UNCLEAR
+  intent_evidence: exacte passage uit NIEUWSTE bericht voor deze intentie
+
+Een melding dat werk al uitgevoerd, afgerond of gereed is, of alleen een
+statusbericht zonder nieuw verzoek: message_intent=COMPLETED of STATUS_ONLY,
+ei_relevant=false, work_requested=false, plan_type=NONE. E&I-trefwoorden of
+een oud geciteerd verzoek maken zo'n bericht geen nieuwe werkopdracht.
+Als de nieuwste boodschap daarnaast om nieuwe actie vraagt, beoordeel die
+actie afzonderlijk en gebruik ACTION_REQUIRED. 'Niet uitgevoerd' betekent
+geen voltooid werk. Geen duidelijk bewijs of tegenstrijdigheid => UNCLEAR en
+review_required=true. Dit onderscheid geldt ook bij categorie Hamza.
 
 TOEGESTAAN:
 A) Expliciet gevraagde E&I-elektriciteit/instrumentatie-werkzaamheden, of E&I spare parts,
