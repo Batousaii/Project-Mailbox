@@ -4,6 +4,7 @@ from contextlib import closing
 import datetime as dt
 import json
 import sqlite3
+import sys
 from pathlib import Path
 
 
@@ -39,8 +40,17 @@ def main():
     p=argparse.ArgumentParser();p.add_argument('action',choices=['backup','ready'])
     p.add_argument('--root',type=Path,required=True);p.add_argument('--destination',type=Path);p.add_argument('--since')
     args=p.parse_args()
-    if args.action=='backup': backup_database(args.root,args.destination)
-    else:readiness(args.root,args.since)
+    if args.action=='backup':
+        backup_database(args.root,args.destination)
+    else:
+        try:
+            readiness(args.root,args.since)
+        except (OSError, ValueError, KeyError, TypeError, RuntimeError, sqlite3.Error) as exc:
+            # Not ready is an expected polling result, never a stderr traceback.
+            # PowerShell 5.1 treats native stderr as terminating under Stop.
+            print('WAITING: '+str(exc))
+            return 2
+    return 0
 
 if __name__=='__main__':
-    main()
+    sys.exit(main())

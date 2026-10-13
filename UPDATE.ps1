@@ -34,6 +34,9 @@ try {
         if (-not (Test-Path -LiteralPath $p -PathType Leaf)) { throw ('Existing installation component missing: ' + $p) }
     }
     if (@(AgentProcesses).Count -gt 1) { throw 'Multiple agents found; update blocked' }
+    Push-Location $PSScriptRoot
+    try { Run-Python -arguments @('-m','unittest','discover','-s','tests_update','-v') }
+    finally { Pop-Location }
     New-Item -ItemType Directory -Path $backup | Out-Null
     Copy-Item -LiteralPath $app -Destination $staging -Recurse
     Copy-Item -Path (Join-Path $PSScriptRoot 'app\agent\*.py') -Destination (Join-Path $staging 'agent') -Force
@@ -58,8 +61,15 @@ try {
     for ($i=0;$i -lt 60;$i++) {
         Start-Sleep -Seconds 5
         if (@(AgentProcesses).Count -eq 0) { throw 'New agent exited' }
-        & $python (Join-Path $PSScriptRoot 'update_control.py') ready --root $root --since $since 2>$null
-        if ($LASTEXITCODE -eq 0 -and @(AgentProcesses).Count -eq 1) { $ready = $true; break }
+        $previousPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $probeOutput = & $python (Join-Path $PSScriptRoot 'update_control.py') ready --root $root --since $since 2>&1
+            $probeExit = $LASTEXITCODE
+        } finally { $ErrorActionPreference = $previousPreference }
+        foreach ($line in $probeOutput) { Write-Host ([string]$line) }
+        if ($probeExit -ne 0 -and $probeExit -ne 2) { throw ('Readiness checker failed, exit ' + $probeExit) }
+        if ($probeExit -eq 0 -and @(AgentProcesses).Count -eq 1) { $ready = $true; break }
     }
     Push-Location $app
     try { Run-Python -arguments @('-m','agent.cli','status') } finally { Pop-Location }

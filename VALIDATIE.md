@@ -42,3 +42,10 @@ Niet live bevestigd: Windows-COM, PowerShell-updater/rollback, de Windows-
 mutexen, Ollama-start als subprocess, modelkwaliteit, werkelijke RAM/CPU,
 login-start en echte forward/delivery. Er is hier niets naar e-mailontvangers
 verzonden en geen wijziging op de Windows-pc uitgevoerd.
+
+
+Updater-correctie 13 oktober 2026: wachten op een eerste scan geeft nu exit 2
+zonder traceback op stderr. PowerShell behandelt dat als wachten, niet als
+installatiefout. Drie nieuwe subprocess-tests controleren ontbrekende status,
+onvoltooide/eerste geslaagde scan, echte scanfout en beschadigde status.
+54 agenttests en 3 updatertests slagen. PowerShell zelf is hier niet uitgevoerd.
