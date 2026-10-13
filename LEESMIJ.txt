@@ -1,0 +1,54 @@
+EE-Reliability 1.7.0 — update van de bestaande installatie
+
+Gebruik:
+1. Pak deze ZIP volledig uit.
+2. Zorg dat klassieke Outlook geopend is en EE-Reliability zichtbaar is.
+3. Dubbelklik UPDATE.bat. STATUS.bat toont nadien de status.
+
+Dit is een upgrade voor de bestaande %LOCALAPPDATA%\EE-ReliabilityAgent
+installatie met werkende venv, pywin32 en qwen3:4b. Geen nieuwe installatie,
+geen globale Pythonwijzigingen, geen adminrechten vereist door deze updater.
+
+De updater test eerst de staged code en Python/Ollama/model/Outlook/mailbox.
+Pas daarna stopt hij de herkenbare agent, maakt een gecontroleerde SQLite-
+backup en bewaart de complete vorige app in upgrade-backups. Hij wisselt
+code, start eenmaal stil en wacht maximaal vijf minuten op een actuele
+heartbeat EN een succesvolle eerste scan. Exit 2 betekent: code bijgewerkt,
+scan nog niet bevestigd. Dat is geen operationele succesmelding.
+Bij een fout na het wisselen wordt vorige code teruggezet. De database wordt
+NOOIT blind teruggerold: dat kan nieuwe verzendstatussen wissen en dubbele
+forwards veroorzaken. Alle lokale backups blijven bewaard.
+
+Bestaande forwardinggoedkeuring blijft behouden. Als forwarding uitstaat,
+blijft die uit: nieuwe toestemming of een test-forward wordt niet verzonnen.
+Er vindt geen historische bulkclassificatie, bulkforward of nieuwe baseline
+plaats. De bestaande login-startup blijft behouden; de updater maakt geen
+extra startup of taak aan. Een echte logout/login-test blijft nodig.
+
+Verbeteringen:
+- Planverzoeken worden werkitems, geen automatische forwards. Hamza en E&I
+  blijven onafhankelijke forwardingregels. Systeemmail blijft uitgesloten.
+- Nog nooit verzonden oude READY/SEND_PLAN items worden opnieuw beoordeeld.
+  SENT, UNKNOWN en historische baseline blijven intact.
+- Een AI-storing blokkeert latere Hamza-mails niet. Na de eerste AI-fout wordt
+  de rest tot de volgende scan uitgesteld in plaats van timeouts te herhalen.
+- Ongewijzigde verwerkte mails worden niet opnieuw door AI beoordeeld.
+- qwen3:4b krijgt keep_alive=30s; na de scan volgt een unload-verzoek.
+  Een generatietest vraagt keep_alive=0. Andere modellen worden niet verwijderd.
+- Bij aantoonbaar geweigerde lokale verbinding wordt bestaande Ollama gestart
+  indien vindbaar. Geen automatische herinstallatie of modeldownload.
+- Alle operationele mailboxroutes gebruiken de bestaande gekoppelde Outlook-
+  sessie, zonder Logon, Recipient.Resolve of nieuwe gedelegeerde verbinding.
+- COM wordt na daemon-scans vrijgegeven. De heartbeat draait apart van AI.
+- Fouten krijgen 15/30/60 minuten backoff; normale cyclus blijft 12 uur.
+- Status toont ook scantijd en aantal AI-pogingen. UNKNOWN wordt niet opnieuw
+  verzonden. Dubbele daemonprocessen worden door Windows-mutex geblokkeerd.
+
+Validatie en grenzen:
+Zie VALIDATIE.md en TESTRESULTATEN.txt. Linux-regressietests zijn uitgevoerd
+met tijdelijke SQLite en gesimuleerde Outlook/AI. Windows, PowerShell,
+werkelijke modelkwaliteit, RAM/CPU, echte verzending, Outlook COM en
+login-startup zijn hier niet live gevalideerd. Dit pakket is daarom geen
+bewijs van een volledig operationele oplevering op jouw pc. De updater
+controleert de beschikbare echte prerequisites en eerste scan op de doel-pc;
+een echte forwarding- en login-test blijven afzonderlijke acceptatiechecks.
