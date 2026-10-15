@@ -40,6 +40,7 @@ try {
     New-Item -ItemType Directory -Path $backup | Out-Null
     Copy-Item -LiteralPath $app -Destination $staging -Recurse
     Copy-Item -Path (Join-Path $PSScriptRoot 'app\agent\*.py') -Destination (Join-Path $staging 'agent') -Force
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'app\agent\role_knowledge.json') -Destination (Join-Path $staging 'agent') -Force
     New-Item -ItemType Directory -Force -Path (Join-Path $staging 'tests') | Out-Null
     Copy-Item -Path (Join-Path $PSScriptRoot 'app\tests\*.py') -Destination (Join-Path $staging 'tests') -Force
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'app\policy_upgrade_helper.py') -Destination $staging -Force
@@ -47,6 +48,7 @@ try {
     try {
         Run-Python -arguments @('-m','unittest','discover','-s','tests','-v')
         Run-Python -arguments @('-m','agent.cli','preflight')
+        Run-Python -arguments @('-m','agent.role_eval','--output',(Join-Path $staging 'role-evaluation.json'))
     } finally { Pop-Location }
     $paused = $true
     Stop-Agent

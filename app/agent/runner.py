@@ -14,6 +14,7 @@ from . import ai
 from .visible_inbox import VisibleInboxGateway as OutlookGateway
 from .rules import Decision, RECIPIENT, POLICY_VERSION, completed_notice, decide_forward, has_hamza_category, is_system_message, plan_review_candidate, split_latest_message
 from .state import State, data_dir, utc_now
+from .role_knowledge import load as role_knowledge, matches as role_matches
 
 LOG = logging.getLogger('ee_reliability')
 SCAN_INTERVAL = 12 * 3600
@@ -142,7 +143,7 @@ def _scan(st, gw, allow_send=True):
                     ai_unavailable = True
                     raise
                 st.complete_deferred_plan(msg['entry_id'], cls)
-                if row['status'] == 'READY' and row['send_token'] is None and cls.message_intent in ('COMPLETED','STATUS_ONLY') and not cls.review_required:
+                if row['status'] == 'READY' and row['send_token'] is None and cls.message_intent in ('COMPLETED','STATUS_ONLY','DEFERRED','OUT_OF_SCOPE') and not cls.review_required:
                     st.classify(msg['entry_id'], decide_forward(msg['categories'], False, cls), cls, False)
                 if cls.work_requested:
                     st.add_work_item(msg, cls, latest)
@@ -180,7 +181,8 @@ def _scan(st, gw, allow_send=True):
                 st.db.commit()
             if cls.work_requested:
                 st.add_work_item(msg, cls, latest)
-            st.audit('CATEGORY_AND_LLM_V15', msg['entry_id'],
+            st.audit('CATEGORY_AND_LLM_V18', msg['entry_id'],
+                     f"role_knowledge={role_knowledge()['version']}; concepts={[c['id'] for c,_ in role_matches(msg['subject']+' '+latest)]}; "
                      f"categories={msg['categories']!r}; decision={decision}; domain={cls.domain}; "
                      f"evidence={cls.evidence!r}; confidence={cls.confidence:.3f}; plan={cls.plan_type}")
         except Exception as exc:

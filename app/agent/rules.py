@@ -7,12 +7,13 @@ import json
 import re
 import unicodedata
 from dataclasses import dataclass, replace
+from .role_knowledge import supports_plan
 
 TARGET_MAILBOX = 'EE-Reliability'
 RECIPIENT = 'hamza.elmakhtari@kuraray.com'
 MODEL = 'qwen3:4b'
 MIN_CONFIDENCE_EXCLUSIVE = 0.80
-POLICY_VERSION = '1.7.2'
+POLICY_VERSION = '1.8.0'
 
 _QUOTE_LINES = [
     re.compile(r'^\s*-{2,}\s*(?:original message|oorspronkelijk bericht)\s*-{2,}', re.I),
@@ -119,7 +120,7 @@ class Decision:
 
 
 _COMPLETED = re.compile(r'\b(?:is|zijn|werd|werden|hebben|heb|has been|have been|was|were)\s+(?:(?:reeds|al|inmiddels|succesvol|successfully|already)\s+)*(?:uitgevoerd|afgerond|voltooid|aangemaakt|aangepast|bijgewerkt|completed|performed|finished|created|updated)\b|\b(?:werk|werkzaamheden|job|work|task)\s+(?:is\s+)?(?:klaar|gereed|done)\b', re.I)
-_OPEN_ACTION = re.compile(r'\b(?:graag|gelieve|please|kun\s+je|kan\s+je|kunt\s+u|can\s+you|could\s+you|moet\w*|nog|niet|not|still|pending|openstaand\w*|verzoek\w*|vraag\w*|request\w*)\b|\?', re.I)
+_OPEN_ACTION = re.compile(r'\b(?:zodra|wanneer|als|once|when|if|after|graag|gelieve|please|kun\s+je|kan\s+je|kunt\s+u|can\s+you|could\s+you|moet\w*|nog|niet|not|still|pending|openstaand\w*|verzoek\w*|vraag\w*|request\w*)\b|\?', re.I)
 _DIRECT_ACTION = re.compile(r'(?:^|[.!?;,\n])\s*(?:maak|pas|wijzig|voeg|controleer|kalibreer|bestel|vervang|stuur|create|modify|update|check|calibrate|order|replace|send)\b', re.I)
 
 
@@ -140,7 +141,7 @@ def plan_review_candidate(subject, latest):
     if completed_notice(latest):
         return False
     scope = (subject or '') + '\n' + (latest or '')
-    return bool(_PLAN_SIGNAL.search(scope) and
+    return bool((_PLAN_SIGNAL.search(scope) or supports_plan(scope)) and
                 (_PLAN_ACTION.search(latest or '') or _PLAN_CHANGE_DETAIL.search(latest or '') or
                  re.search(r'\b(?:correctie|correction|aanpassing|wijziging)\b', subject or '', re.I)))
 
@@ -168,7 +169,7 @@ def decode_classification(raw):
             raise ValueError('Plan subtype/work request inconsistent')
         evidence = str(raw.get('evidence', '')).strip()[:350]
         intent = str(raw.get('message_intent', 'UNSPECIFIED')).upper()
-        if intent not in ('UNSPECIFIED', 'ACTION_REQUIRED', 'COMPLETED', 'STATUS_ONLY', 'UNCLEAR'):
+        if intent not in ('UNSPECIFIED', 'ACTION_REQUIRED', 'COMPLETED', 'STATUS_ONLY', 'DEFERRED', 'OUT_OF_SCOPE', 'UNCLEAR'):
             raise ValueError('Unknown message intent')
         intent_evidence = str(raw.get('intent_evidence', '')).strip()[:350]
         review = bool(raw.get('review_required', False)) or conf <= MIN_CONFIDENCE_EXCLUSIVE
@@ -187,7 +188,7 @@ def decode_classification(raw):
 
 def ground_decision(cls, subject, latest):
     """Validate claimed evidence belongs to the NEW text, not quote history."""
-    if cls.message_intent in ('COMPLETED', 'STATUS_ONLY'):
+    if cls.message_intent in ('COMPLETED', 'STATUS_ONLY', 'DEFERRED', 'OUT_OF_SCOPE'):
         if (cls.review_required or cls.confidence <= MIN_CONFIDENCE_EXCLUSIVE or
                 len(cls.intent_evidence) < 6 or _normalize(cls.intent_evidence) not in _normalize(latest) or
                 cls.work_requested or cls.ei_relevant or _DIRECT_ACTION.search(latest)):
@@ -203,7 +204,7 @@ def ground_decision(cls, subject, latest):
     if cls.work_requested:
         # A new inventory article is NOT an inspection/PO/maintenance plan.
         correction_detail = _PLAN_ACTION.search(subject or '') and _PLAN_CHANGE_DETAIL.search(latest)
-        if cls.domain != 'PLAN' or not _PLAN_SIGNAL.search(scope) or not (_PLAN_ACTION.search(latest) or correction_detail):
+        if cls.domain != 'PLAN' or not (_PLAN_SIGNAL.search(scope) or supports_plan(scope)) or not (_PLAN_ACTION.search(latest) or correction_detail):
             return replace(cls, review_required=True,
                            reason='REVIEW_REQUIRED: concrete planidentificatie ontbreekt: ' + cls.reason)
     if cls.ei_relevant:
@@ -222,7 +223,7 @@ def decide_forward(categories, system_message, cls):
     """Category is a real Outlook property; only supported E&I/plan intents pass."""
     if system_message:
         return 'SUPPRESS_SYSTEM_HAMZA' if has_hamza_category(categories) else 'SUPPRESS_SYSTEM'
-    if cls is not None and cls.message_intent in ('COMPLETED', 'STATUS_ONLY') and not cls.review_required:
+    if cls is not None and cls.message_intent in ('COMPLETED', 'STATUS_ONLY', 'DEFERRED', 'OUT_OF_SCOPE') and not cls.review_required:
         return 'SUPPRESS_' + cls.message_intent
     if cls is not None and cls.message_intent == 'UNCLEAR' and cls.intent_evidence and cls.review_required:
         return 'REVIEW_REQUIRED'

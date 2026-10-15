@@ -188,7 +188,7 @@ def audit_full(data_root, gateway, classify=None, output=None, snapshot=None):
             print(f'[{i}/{len(snapshot)}] {row["Classification"]} | Hamza={row["HamzaCategory"]} | '
                   f'{row["Subject"][:95]}', flush=True)
     summary = {
-        'version':'1.7.2',
+        'version':'1.8.0',
         'audit_finished_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds'),
         'scope':'EE-Reliability / Inbox / MailItems only',
         'snapshot_inbox_count':len(snapshot),

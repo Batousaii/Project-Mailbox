@@ -1,0 +1,392 @@
+{
+  "version": "1.8.0",
+  "role": "EE-Reliability: E&I-werk en SAP PM-onderhoudsplanning",
+  "boundaries": [
+    "Geen SAP-wijzigingen of toegang door deze mailagent.",
+    "Planwerk is een aparte werkstroom; forwarding vereist onafhankelijk Hamza of E&I.",
+    "Beoordeel de nieuwste boodschap; onderwerp/historie verduidelijken alleen.",
+    "Een genoemd begrip is geen opdracht. Niet zeker betekent REVIEW_REQUIRED.",
+    "Kennis is een beheerbare startset, geen volledige SAP-ontologie en geen getraind model.",
+    "Toekomstige voorwaardelijke mogelijkheden en uitsluitend acties van andere partijen zijn geen huidige opdracht voor deze rol. Een concrete opdracht aan ons met een latere deadline blijft wel werk."
+  ],
+  "concepts": [
+    {
+      "id": "MAINTENANCE_PLAN",
+      "label": "Onderhoudsplan / maintenance plan",
+      "aliases": [
+        "onderhoudsplan",
+        "onderhoudsplannen",
+        "maintenance plan",
+        "maintenance plans",
+        "PO-plan",
+        "PO plan",
+        "PM-plan",
+        "PM plan",
+        "inspectieplan",
+        "inspectieplannen",
+        "inspection plan"
+      ],
+      "plan_object": true,
+      "meaning": "Plant preventief onderhoud of inspecties; nieuwe inrichting is CREATE_PLAN, wijziging van bestaande inrichting MODIFY_PLAN.",
+      "related": [
+        "MAINTENANCE_ITEM",
+        "STRATEGY",
+        "CYCLE",
+        "SCHEDULING"
+      ]
+    },
+    {
+      "id": "MAINTENANCE_ITEM",
+      "label": "Onderhoudsitem / maintenance item",
+      "aliases": [
+        "maintenance item",
+        "maintenance items",
+        "onderhoudsitem",
+        "onderhoudsitems",
+        "planitem",
+        "plan item"
+      ],
+      "plan_object": true,
+      "meaning": "Onderdeel van onderhoudsplanning met technische objecten, planningsgegevens en mogelijk een taaklijst; tekst/omschrijving corrigeren kan planonderhoud zijn. Losse term item zonder SAP-context is onvoldoende.",
+      "related": [
+        "MAINTENANCE_PLAN",
+        "TASK_LIST",
+        "TECH_OBJECT"
+      ]
+    },
+    {
+      "id": "TASK_LIST",
+      "label": "Onderhoudstaaklijst",
+      "aliases": [
+        "onderhoudstaaklijst",
+        "maintenance task list",
+        "task list",
+        "taaklijst",
+        "taaklijsten",
+        "werklijst onderhoud"
+      ],
+      "plan_object": true,
+      "meaning": "Herbruikbare onderhoudsinstructies en bewerkingen; wijziging van onderhoudstaaklijst of toegewezen bewerking kan onderhoudsplanconfiguratie betreffen. Geen gewone vergaderactielijst.",
+      "related": [
+        "OPERATION",
+        "MAINTENANCE_ITEM",
+        "STRATEGY"
+      ]
+    },
+    {
+      "id": "STRATEGY",
+      "label": "Onderhoudsstrategie",
+      "aliases": [
+        "onderhoudsstrategie",
+        "maintenance strategy",
+        "strategy plan",
+        "strategieplan",
+        "strategie plan"
+      ],
+      "plan_object": true,
+      "meaning": "Combinatie van onderhoudspakketten en cycli; wijzigen kan onderhoudsplanning wijzigen. Geen algemene bedrijfsstrategie.",
+      "related": [
+        "PACKAGE",
+        "CYCLE",
+        "MAINTENANCE_PLAN"
+      ]
+    },
+    {
+      "id": "PACKAGE",
+      "label": "Onderhoudspakket",
+      "aliases": [
+        "onderhoudspakket",
+        "maintenance package",
+        "maintenance packages",
+        "cycluspakket",
+        "pakketindeling"
+      ],
+      "plan_object": true,
+      "meaning": "Pakket met onderhoudsinterval; toevoegen, verwijderen of koppelen aan onderhoudsbewerking kan een planwijziging zijn.",
+      "related": [
+        "STRATEGY",
+        "OPERATION",
+        "CYCLE"
+      ]
+    },
+    {
+      "id": "CYCLE",
+      "label": "Cyclus en periodiciteit",
+      "aliases": [
+        "periodiciteit",
+        "periodicity",
+        "onderhoudsinterval",
+        "maintenance interval",
+        "onderhoudscyclus",
+        "maintenance cycle",
+        "frequentie",
+        "frequency",
+        "6M",
+        "12M",
+        "3M",
+        "5J",
+        "5Y"
+      ],
+      "plan_object": false,
+      "meaning": "Cycli zoals maanden/jaren hebben alleen betekenis met onderhoudscontext. Ontbrekende periodiciteit met voorgesteld interval kan een verkort correctieverzoek zijn, geen bewijs op zichzelf.",
+      "related": [
+        "MAINTENANCE_ITEM",
+        "PACKAGE",
+        "SCHEDULING"
+      ]
+    },
+    {
+      "id": "SCHEDULING",
+      "label": "Afroep en planningsparameters",
+      "aliases": [
+        "scheduling parameters",
+        "planningsparameters",
+        "call horizon",
+        "afroephorizon",
+        "shift factor",
+        "verschuivingsfactor",
+        "scheduling indicator",
+        "startdatum",
+        "cycle start",
+        "afroep",
+        "afroepen"
+      ],
+      "plan_object": false,
+      "meaning": "Instellingen voor onderhoudsafroepen en termijnen; onderscheid instellingswijziging van uitvoering van een al bestaande werkorder.",
+      "related": [
+        "MAINTENANCE_PLAN",
+        "WORK_ORDER",
+        "CYCLE"
+      ]
+    },
+    {
+      "id": "OPERATION",
+      "label": "Onderhoudsbewerking",
+      "aliases": [
+        "onderhoudsbewerking",
+        "onderhoudsbewerkingen",
+        "maintenance operation",
+        "maintenance operations",
+        "planregel",
+        "planregel verwijderen",
+        "regel verwijderen"
+      ],
+      "plan_object": false,
+      "meaning": "Bewerking/instructie op een onderhoudstaaklijst of plan; planregel verwijderen is MODIFY_PLAN wanneer de context dat bevestigt.",
+      "related": [
+        "TASK_LIST",
+        "PACKAGE"
+      ]
+    },
+    {
+      "id": "TECH_OBJECT",
+      "label": "Technisch object",
+      "aliases": [
+        "equipment",
+        "equipmentnummer",
+        "functional location",
+        "functieplaats",
+        "technische plaats",
+        "technisch object",
+        "tagnummer",
+        "tag number",
+        "asset"
+      ],
+      "plan_object": false,
+      "meaning": "Onderhoud kan gekoppeld zijn aan equipment of een functieplaats. Een genoemd object zegt niet dat er een opdracht is.",
+      "related": [
+        "MAINTENANCE_ITEM",
+        "WORK_ORDER"
+      ]
+    },
+    {
+      "id": "WORK_ORDER",
+      "label": "Werkorder",
+      "aliases": [
+        "werkorder",
+        "work order",
+        "maintenance order",
+        "onderhoudsorder",
+        "PM-order",
+        "PM order",
+        "werkbon"
+      ],
+      "plan_object": false,
+      "meaning": "Opdracht voor uitvoering; een werkorder aanmaken of afronden is niet automatisch een verzoek het preventieve plan te wijzigen.",
+      "related": [
+        "NOTIFICATION",
+        "TECH_OBJECT",
+        "MAINTENANCE_PLAN"
+      ]
+    },
+    {
+      "id": "NOTIFICATION",
+      "label": "Onderhoudsmelding",
+      "aliases": [
+        "onderhoudsmelding",
+        "maintenance notification",
+        "storingsmelding",
+        "malfunction report",
+        "defectmelding"
+      ],
+      "plan_object": false,
+      "meaning": "Melding van storing/behoefte. E&I-inhoud kan relevant zijn, maar een melding is niet automatisch een planwijziging.",
+      "related": [
+        "WORK_ORDER",
+        "TECH_OBJECT"
+      ]
+    },
+    {
+      "id": "BOM",
+      "label": "Technische stuklijst",
+      "aliases": [
+        "stuklijst",
+        "stuklijsten",
+        "bill of materials",
+        "BOM",
+        "equipment BOM",
+        "spare parts list"
+      ],
+      "plan_object": false,
+      "meaning": "Componentenlijst; E&I-stuklijstverzoek is E&I-relevant. Mechanische BOM-wijziging is op zichzelf geen onderhoudsplanwijziging.",
+      "related": [
+        "SPARES",
+        "TECH_OBJECT"
+      ]
+    },
+    {
+      "id": "SPARES",
+      "label": "Reserveonderdelen en magazijn",
+      "aliases": [
+        "spare part",
+        "spare parts",
+        "reserveonderdelen",
+        "wisselstukken",
+        "magazijnartikel",
+        "voorraad",
+        "stock",
+        "materiaalstam",
+        "material master"
+      ],
+      "plan_object": false,
+      "meaning": "Beoordeel het technische domein. Mechanische voorraad of materiaalstam is niet automatisch E&I of planwerk.",
+      "related": [
+        "BOM",
+        "ELECTRICAL",
+        "INSTRUMENTATION",
+        "MECHANICAL"
+      ]
+    },
+    {
+      "id": "ELECTRICAL",
+      "label": "Elektriciteit en automatisering",
+      "aliases": [
+        "E&I",
+        "elektrisch",
+        "elektrische",
+        "electrical",
+        "PLC",
+        "DCS",
+        "SCADA",
+        "VFD",
+        "frequentieomvormer",
+        "schakelkast",
+        "bekabeling",
+        "elektromotor",
+        "isolatiemeting",
+        "aardingsmeting"
+      ],
+      "plan_object": false,
+      "meaning": "Elektrische werkzaamheden, onderdelen, stuklijsten en relevante werkvragen vallen onder E&I; uitsluitend technische woorden in een afgerond verslag maken geen nieuwe opdracht.",
+      "related": [
+        "INSTRUMENTATION",
+        "SPARES"
+      ]
+    },
+    {
+      "id": "INSTRUMENTATION",
+      "label": "Instrumentatie en kalibratie",
+      "aliases": [
+        "instrumentatie",
+        "instrumentation",
+        "kalibratie",
+        "calibration",
+        "kalibreren",
+        "sensor",
+        "transmitter",
+        "druktransmitter",
+        "flowmeter",
+        "debietmeter",
+        "thermokoppel",
+        "meetlus",
+        "regelklep",
+        "control valve"
+      ],
+      "plan_object": false,
+      "meaning": "Meet- en regeltechniek; sensor/transmitter/control-valve zijn E&I-context, een gewone check valve is niet automatisch instrumentatie.",
+      "related": [
+        "ELECTRICAL",
+        "SPARES"
+      ]
+    },
+    {
+      "id": "MECHANICAL",
+      "label": "Mechanisch onderhoud",
+      "aliases": [
+        "mechanisch",
+        "mechanical",
+        "lager",
+        "bearing",
+        "gearbox",
+        "tandwielkast",
+        "pakking",
+        "dichting",
+        "check valve",
+        "filter",
+        "leiding",
+        "piping"
+      ],
+      "plan_object": false,
+      "meaning": "Geen automatische E&I-forward bij uitsluitend mechanisch werk. Een concrete onderhoudsplanwijziging voor mechanische assets blijft wel planwerk.",
+      "related": [
+        "MAINTENANCE_PLAN",
+        "SPARES"
+      ]
+    },
+    {
+      "id": "PROCUREMENT",
+      "label": "Inkoop en purchase orders",
+      "aliases": [
+        "purchase order",
+        "purchase requisition",
+        "inkooporder",
+        "bestelbon",
+        "inkoopaanvraag"
+      ],
+      "plan_object": false,
+      "meaning": "PO als purchase order is inkoop, niet PO-plan als preventief onderhoud. Bestellen en voorraadbeheer alleen zijn geen planwijziging.",
+      "related": [
+        "SPARES"
+      ]
+    },
+    {
+      "id": "COMPLETION",
+      "label": "Uitvoering en afronding",
+      "aliases": [
+        "uitgevoerd",
+        "afgerond",
+        "voltooid",
+        "completed",
+        "performed",
+        "klaar",
+        "aangepast"
+      ],
+      "plan_object": false,
+      "meaning": "Afgerond werk zonder nieuwe opdracht is COMPLETED/STATUS_ONLY. Negatie, openstaande actie en nieuw wijzigingsverzoek in dezelfde boodschap blijven beoordelen.",
+      "related": [
+        "WORK_ORDER",
+        "MAINTENANCE_PLAN"
+      ]
+    }
+  ]
+}

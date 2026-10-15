@@ -9,6 +9,7 @@ import subprocess
 import time
 from pathlib import Path
 from .rules import MODEL, decode_classification, ground_decision, plan_review_candidate
+from .role_knowledge import context_for
 
 BASE_URL = 'http://127.0.0.1:11434'
 
@@ -24,7 +25,7 @@ Antwoord UITSLUITEND als JSON met exact:
   confidence: 0..1
   review_required: boolean
   reason: korte Nederlandstalige verklaring
-  message_intent: ACTION_REQUIRED | COMPLETED | STATUS_ONLY | UNCLEAR
+  message_intent: ACTION_REQUIRED | COMPLETED | STATUS_ONLY | DEFERRED | OUT_OF_SCOPE | UNCLEAR
   intent_evidence: exacte passage uit NIEUWSTE bericht voor deze intentie
 
 Een melding dat werk al uitgevoerd, afgerond of gereed is, of alleen een
@@ -36,6 +37,18 @@ actie afzonderlijk en gebruik ACTION_REQUIRED. 'Niet uitgevoerd' betekent
 geen voltooid werk. Geen duidelijk bewijs of tegenstrijdigheid => UNCLEAR en
 review_required=true. Dit onderscheid geldt ook bij categorie Hamza.
 
+VERANTWOORDELIJKHEID EN VOORWAARDEN:
+- Een toekomstige mogelijkheid ('zodra metingen beschikbaar zijn kunnen we later
+  een plan maken') zonder concrete toegewezen opdracht is DEFERRED, geen huidig
+  werkitem: ei_relevant=false, work_requested=false, plan_type=NONE.
+- Een uitsluitend aan een andere partij toegewezen actie zonder vraag aan
+  Hamza/E&I/EE-Reliability is OUT_OF_SCOPE, met dezelfde negatieve velden.
+- Citeer voor DEFERRED/OUT_OF_SCOPE letterlijk de voorwaarde of andere eigenaar.
+  Bij onduidelijke eigenaar/toewijzing gebruik UNCLEAR en review_required=true.
+- Een concrete opdracht aan ons om NU voor te bereiden blijft ACTION_REQUIRED,
+  ook als uitvoering later is. Een deadline maakt een echte opdracht niet DEFERRED.
+- Planwoorden in een toekomstscenario zijn geen huidige planwijzigingsopdracht.
+
 TOEGESTAAN:
 A) Expliciet gevraagde E&I-elektriciteit/instrumentatie-werkzaamheden, of E&I spare parts,
    instrumentwisselstukken, E&I-stuklijsten, sensoren, transmitters, PLC, kalibraties,
@@ -44,6 +57,10 @@ B) Concrete opdracht om een INSPECTIEPLAN, PO-PLAN of ONDERHOUDSPLAN AAN TE MAKE
    of een BESTAAND plan AAN TE PASSEN / WIJZIGEN / AANVULLEN / STOPPEN.
    domain=PLAN, work_requested=true, plan_type CREATE_PLAN of MODIFY_PLAN.
    Ook mechanische assets mogen, zolang een echt PLAN de opdracht is.
+   SAP PM-configuratiewerk aan gekoppelde maintenance items, onderhoudstaaklijsten,
+   onderhoudsstrategie of onderhoudspakketten hoort bij dezelfde planwerkstroom:
+   CREATE_PLAN voor nieuw opzetten, MODIFY_PLAN voor bestaande inrichting wijzigen.
+   Een gewone werkorder, magazijnstuklijst of inkooporder is niet zo'n planobject.
    Ook correctie van een maintenance item / onderhoudsitem, tekst, periodiciteit,
    frequentie, interval of planregel kan MODIFY_PLAN zijn. Beoordeel verkorte
    NL/EN-verzoeken in samenhang: een correctieonderwerp met een nieuwste boodschap
@@ -103,7 +120,7 @@ def classify(subject, latest, context):
               f'NIEUWSTE BERICHT (enige bron voor bewijs):\n{latest}\n\n'
               f'GECITEERDE HISTORIE (uitsluitend ter verduidelijking):\n{context}')
     body = {
-        'model':MODEL,'system':SYSTEM_PROMPT,'prompt':prompt,
+        'model':MODEL,'system':SYSTEM_PROMPT+'\n\n'+context_for(subject, latest),'prompt':prompt,
         'format':'json','think':False,'stream':False,'keep_alive':'30s',
         'options':{'temperature':0,'num_predict':500},
     }
@@ -111,7 +128,7 @@ def classify(subject, latest, context):
     if not resp.get('done'):
         raise RuntimeError('Modelantwoord niet voltooid')
     decision = ground_decision(decode_classification(resp.get('response','')),subject,latest)
-    if not decision.work_requested and decision.message_intent not in ('COMPLETED','STATUS_ONLY') and plan_review_candidate(subject, latest):
+    if not decision.work_requested and decision.message_intent not in ('COMPLETED','STATUS_ONLY','DEFERRED','OUT_OF_SCOPE') and plan_review_candidate(subject, latest):
         # One bounded extra call only for contradictory or easily missed plan intents.
         body['prompt'] += ('\n\nHERCONTROLE: de eerste beoordeling vond geen planwerk. '
             'Controleer specifiek of de NIEUWSTE boodschap een nieuw of gewijzigd '
@@ -122,7 +139,7 @@ def classify(subject, latest, context):
         if not retry.get('done'):
             raise RuntimeError('Planhercontrole niet voltooid')
         decision = ground_decision(decode_classification(retry.get('response','')), subject, latest)
-        if not decision.work_requested and decision.message_intent not in ('COMPLETED','STATUS_ONLY'):
+        if not decision.work_requested and decision.message_intent not in ('COMPLETED','STATUS_ONLY','DEFERRED','OUT_OF_SCOPE'):
             decision = replace(decision, review_required=True,
                                reason='REVIEW_REQUIRED: mogelijk planwijzigingsverzoek na hercontrole; '+decision.reason)
     return decision

@@ -77,3 +77,41 @@ nieuwe regressietest is fictief.
 Een extra regressietest controleert dat een al klaargezette Hamza-mail met
 uitgestelde AI-beoordeling alsnog uit de verzendqueue verdwijnt als de
 nieuwste tekst ondubbelzinnig afgerond werk meldt.
+
+
+1.8.0: lokale rolkennis met 18 begripsclusters, 152 NL/EN-aliases en
+expliciete relaties. Relevante definities worden begrensd tot 4200 tekens
+in de modelinstructie opgenomen; er is geen extra server/model of embedding.
+Plan-scopecontrole gebruikt dezelfde kennis. Alleen een positieve,
+bewijsbare modelbeoordeling mag een werkitem opleveren; kennislabels alleen
+geven geen toestemming. Versie en herkende concepten worden gelogd.
+
+Zeven nieuwe regressietests toetsen alle aliasrelaties, begrensde context,
+maintenance-item/plan-relaties, generieke item/inkoop/BOM-uitsluitingen,
+taaklijst/strategie-grounding, werkelijke promptintegratie en de evaluatiegate
+bij onjuiste modelbeslissingen en veranderde modeldigest. Met bestaande
+suites zijn 74 agenttests en 3 updatertests geslaagd. De evaluatiegate zelf
+is in deze tests met gesimuleerde modelantwoorden getest.
+
+Er is daarnaast een aparte REAL-MODEL-test van 14 synthetische mails. Die
+is hier niet uitgevoerd: localhost:11434 is niet bereikbaar. UPDATE.ps1
+voert deze test op de bestaande doel-pc uit VOOR pauzeren of codewissel.
+Een mislukking laat de bestaande agent intact en schrijft een JSON-rapport.
+Het gaat dus niet langer alleen om 'kan Qwen OK zeggen'. Een eerder geslaagd
+rapport is alleen herbruikbaar bij dezelfde code, kennis, testset en
+Ollama-modeldigest. STATUS.bat vermeldt het opgeslagen testresultaat.
+
+Dit is een domeinspecifieke configuratie/kennislaag rond Qwen3:4b, geen
+zelf getraind klein taalmodel. De kennis is niet uitputtend en de 14 cases
+bewijzen geen algemene foutloosheid. Lokale SAP-afkortingen en verdere
+verfijning vereisen inhoudelijke voorbeelden en gecontroleerde updates.
+
+Nieuwe gebruikerssturing: toekomstig planwerk na een externe mijlpaal zonder
+actie voor de gebruiker is geen actieve opdracht. Twee nieuwe echte modelcases
+(14 totaal) onderscheiden dit van huidige voorbereiding. Drie nieuwe
+regressietests controleren suppression ook bij Hamza, bewijscontrole en
+geen herhaalcall voor een onderbouwd DEFERRED-antwoord. Voorwaardelijke taal
+wordt niet meer door de goedkope completion-gate afgehandeld. De aangeleverde
+Windows-uitvoer bevestigt dat 1.7.2 RUNNING is met een geslaagde scan van
+51,427 seconden, 1 classificatiepoging en geen laatste fout. Die uitvoer bewijst
+niet dat de mail van de baas correct is herkend of dat 1.8.0 al werkt.
