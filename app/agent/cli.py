@@ -88,7 +88,7 @@ def status(st):
     except Exception:
         checks['last_full_mailbox_audit'] = 'NOT_COMPLETED'
     checks.update({
-        'integrated_audit_version': '1.8.0',
+        'integrated_audit_version': '1.9.0',
         'forwarding_policy_version': POLICY_VERSION,
         'baseline': st.setting('baseline_completed','0') == '1',
         'historical_count': st.counts().get('HISTORICAL_IGNORE', 0),
@@ -113,7 +113,7 @@ def status(st):
                              'aliases':sum(len(c['aliases']) for c in knowledge['concepts'])}
     try:
         report=json.loads((Path(__file__).resolve().parents[1]/'role-evaluation.json').read_text(encoding='utf-8'))
-        checks['saved_role_evaluation']={k:report.get(k) for k in ('completed_at','passed','failed','model','model_digest')}
+        checks['saved_role_evaluation']={k:report.get(k) for k in ('completed_at','passed','failed','model','model_digest','false_forwards','missed_forwards','missed_work_items','unexpected_work_items')}
         checks['saved_role_evaluation']['matches_current_code']=report.get('signature')==signature()
     except (OSError,ValueError):
         checks['saved_role_evaluation']='NOT_RUN'

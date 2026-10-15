@@ -115,3 +115,41 @@ wordt niet meer door de goedkope completion-gate afgehandeld. De aangeleverde
 Windows-uitvoer bevestigt dat 1.7.2 RUNNING is met een geslaagde scan van
 51,427 seconden, 1 classificatiepoging en geen laatste fout. Die uitvoer bewijst
 niet dat de mail van de baas correct is herkend of dat 1.8.0 al werkt.
+
+
+1.9.0: ontwerpbeoordeling op basis van daadwerkelijk gelezen officiële
+AgentDojo-, tau-bench- en Anthropic-cookbookbronnen; zie AGENTONTWERP.md.
+Er zijn geen externe benchmarks geïnstalleerd of uitgevoerd en er is geen
+claim op hun scores. De geblokkeerde arXiv/Anthropic-webpagina's zijn niet als
+gelezen bronnen behandeld.
+
+De classificatie krijgt actie, eigenaar en timing. Positieve/ambigue gevallen
+krijgen maximaal één afzonderlijke semantische herbeoordeling. Twee consistente
+onderbouwingen met letterlijk actueel bewijs kunnen een lexicale afwijzing
+overrulen. Het model kan de verificatievlag niet zelf via JSON zetten. Dit is
+geen onafhankelijk bewijs omdat dezelfde Qwen tweemaal beoordeelt. Bekende
+regels blijven bij legacy/incomplete antwoorden conservatieve controles.
+
+Afgerond werk wordt niet meer uitsluitend met een goedkope woordregel
+operationeel afgehandeld: nieuwe niet-systeemmails gaan naar de classifier.
+Ondertekeningen en >-quotes zijn gescheiden; te lange of bijna verzadigde
+modelcontext wordt review. Context is expliciet tot 8192 tokens begrensd.
+Maximaal drie eerdere lokale records worden als context meegegeven en blijven
+binnen 1800 tekens als geldige JSON. Inhoudelijke aktie, eigenaar, timing en
+verificatieopmerking staan in mail_audit.csv en review_queue.csv.
+
+Twaalf nieuwe regressietests toetsen onbekende E&I-/planformuleringen,
+meningsverschil, onbetrouwbare recipient/verified-velden, bewijs uit oude
+quotes, JSON-datagrens, signatures, truncatie en contextverzadiging, begrensd
+geheugen, semantisch herkende externe eigenaar en end-to-end verzending met
+persistentie over herstart. De bestaande completion-tests controleren nu een
+modelbeoordeling in plaats van de verwijderde keyword-shortcut; hun eisen
+nul forwards/werkitems blijven behouden.
+
+86 agenttests en 3 updatertests slagen. De inhoudelijke modeltest is uitgebreid
+tot 21 synthetische situaties met expliciete forwarding-/werkitemuitkomsten en
+fouttellers. Veilige review wordt voor ontbrekende context toegestaan; een
+exact voorgeschreven reden of stappenvolgorde is geen acceptatie-eis. Deze
+21 cases zijn in de cloud niet op een echte Qwen uitgevoerd. Ze blijven een
+gate vóór installatie op de bestaande pc. RAM/CPU en echte mailboxkwaliteit
+zijn niet gemeten. Er is geen nieuwe mailboxactie in deze cloud uitgevoerd.

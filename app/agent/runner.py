@@ -113,8 +113,7 @@ def _scan(st, gw, allow_send=True):
                 st.db.commit()
                 row = st.row(msg['entry_id'])
         review_plan = (row['status'] == 'REVIEW_REQUIRED' and row['send_token'] is None
-                       and row['plan_review_version'] != POLICY_VERSION
-                       and plan_review_candidate(msg['subject'], row['llm_evidence']))
+                       and row['plan_review_version'] != POLICY_VERSION)
         deferred = bool(row['plan_pending']) or review_plan
         if row['status'] not in ('NEW',) and not deferred:
             continue
@@ -126,13 +125,9 @@ def _scan(st, gw, allow_send=True):
                 st.db.commit()
             system = is_system_message(msg['subject'], details['message_class'], details['headers'], details['body'])
             latest, context = split_latest_message(details['body'])
-            completed = completed_notice(latest) if not system else None
-            if completed is not None:
-                if row['status'] in ('NEW','READY','REVIEW_REQUIRED') and row['send_token'] is None:
-                    st.classify(msg['entry_id'], decide_forward(msg['categories'], False, completed), completed, False)
-                elif deferred:
-                    st.complete_deferred_plan(msg['entry_id'], completed)
-                continue
+            memory=st.conversation_memory(msg)
+            if memory:
+                context=context+'\n\n'+memory
             if deferred:
                 if ai_unavailable:
                     continue

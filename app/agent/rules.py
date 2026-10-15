@@ -13,7 +13,7 @@ TARGET_MAILBOX = 'EE-Reliability'
 RECIPIENT = 'hamza.elmakhtari@kuraray.com'
 MODEL = 'qwen3:4b'
 MIN_CONFIDENCE_EXCLUSIVE = 0.80
-POLICY_VERSION = '1.8.0'
+POLICY_VERSION = '1.9.0'
 
 _QUOTE_LINES = [
     re.compile(r'^\s*-{2,}\s*(?:original message|oorspronkelijk bericht)\s*-{2,}', re.I),
@@ -78,14 +78,21 @@ def split_latest_message(body):
     lines = (body or '').replace('\r\n', '\n').replace('\r', '\n').split('\n')
     cut = len(lines)
     for i, line in enumerate(lines):
-        if i >= 1 and any(p.match(line) for p in _QUOTE_LINES):
+        if re.match(r'^\s*>', line) or any(p.match(line) for p in _QUOTE_LINES):
             if re.match(r'^\s*(from|van):\s+', line, re.I):
                 window = '\n'.join(lines[i:i + 8])
                 if not re.search(r'(?im)^\s*(sent|verzonden|to|aan|subject|onderwerp):', window):
                     continue
             cut = i
             break
-    return '\n'.join(lines[:cut]).strip()[:12000], '\n'.join(lines[cut:]).strip()[:3500]
+    for i,line in enumerate(lines[:cut]):
+        if i > 0 and re.match(r'^\s*(?:met vriendelijke groet(?:en)?|with kind regards|kind regards|best regards|regards|mvg|groeten)\s*[,!.]?\s*$',line,re.I):
+            cut=i
+            break
+    latest='\n'.join(lines[:cut]).strip()
+    if len(latest)>12000:
+        latest=latest[:11950]+'\n[EE_AGENT_TRUNCATED_NEW_MESSAGE]'
+    return latest, '\n'.join(lines[cut:]).strip()[:3500]
 
 
 def canonical_subject(subject):
@@ -117,6 +124,11 @@ class Decision:
     evidence: str = ''
     message_intent: str = 'UNSPECIFIED'
     intent_evidence: str = ''
+    action_summary: str = ''
+    action_owner: str = 'UNSPECIFIED'
+    action_timing: str = 'UNSPECIFIED'
+    semantic_verified: bool = False
+    verification_note: str = ''
 
 
 _COMPLETED = re.compile(r'\b(?:is|zijn|werd|werden|hebben|heb|has been|have been|was|were)\s+(?:(?:reeds|al|inmiddels|succesvol|successfully|already)\s+)*(?:uitgevoerd|afgerond|voltooid|aangemaakt|aangepast|bijgewerkt|completed|performed|finished|created|updated)\b|\b(?:werk|werkzaamheden|job|work|task)\s+(?:is\s+)?(?:klaar|gereed|done)\b', re.I)
@@ -172,6 +184,11 @@ def decode_classification(raw):
         if intent not in ('UNSPECIFIED', 'ACTION_REQUIRED', 'COMPLETED', 'STATUS_ONLY', 'DEFERRED', 'OUT_OF_SCOPE', 'UNCLEAR'):
             raise ValueError('Unknown message intent')
         intent_evidence = str(raw.get('intent_evidence', '')).strip()[:350]
+        action_summary = str(raw.get('action_summary', '')).strip()[:500]
+        owner = str(raw.get('action_owner', 'UNSPECIFIED')).upper()
+        timing = str(raw.get('action_timing', 'UNSPECIFIED')).upper()
+        if owner not in ('OUR_ROLE','OTHER','UNSPECIFIED') or timing not in ('CURRENT','ASSIGNED_FUTURE','CONDITIONAL','NONE','UNSPECIFIED'):
+            raise ValueError('Invalid action owner/timing')
         review = bool(raw.get('review_required', False)) or conf <= MIN_CONFIDENCE_EXCLUSIVE
         if (ei or work) and not evidence:
             review = True
@@ -181,17 +198,25 @@ def decode_classification(raw):
             review = True
         return Decision(ei, subtype, work, conf, str(raw.get('reason', '')).strip()[:800],
                         review, str(raw.get('plan_target', '')).strip()[:180], domain, evidence,
-                        intent, intent_evidence)
+                        intent, intent_evidence, action_summary, owner, timing)
     except (ValueError, TypeError, KeyError) as exc:
         return Decision(reason=f'REVIEW_REQUIRED: ongeldig modelantwoord ({exc})', review_required=True)
 
 
 def ground_decision(cls, subject, latest):
     """Validate claimed evidence belongs to the NEW text, not quote history."""
+    if (cls.ei_relevant or cls.work_requested) and cls.action_summary:
+        if len(cls.action_summary)<8 or cls.action_owner != 'OUR_ROLE' or cls.action_timing not in ('CURRENT','ASSIGNED_FUTURE') or cls.message_intent != 'ACTION_REQUIRED':
+            return replace(cls, review_required=True, message_intent='UNCLEAR',
+                           intent_evidence=cls.evidence or cls.intent_evidence,
+                           reason='REVIEW_REQUIRED: actie, eigenaar en timing zijn tegenstrijdig')
     if cls.message_intent in ('COMPLETED', 'STATUS_ONLY', 'DEFERRED', 'OUT_OF_SCOPE'):
+        verified_scope=(cls.semantic_verified and
+                        ((cls.message_intent=='OUT_OF_SCOPE' and cls.action_owner=='OTHER') or
+                         (cls.message_intent=='DEFERRED' and cls.action_timing=='CONDITIONAL')))
         if (cls.review_required or cls.confidence <= MIN_CONFIDENCE_EXCLUSIVE or
                 len(cls.intent_evidence) < 6 or _normalize(cls.intent_evidence) not in _normalize(latest) or
-                cls.work_requested or cls.ei_relevant or _DIRECT_ACTION.search(latest)):
+                cls.work_requested or cls.ei_relevant or (_DIRECT_ACTION.search(latest) and not verified_scope)):
             return replace(cls, message_intent='UNCLEAR', review_required=True,
                            reason='REVIEW_REQUIRED: status/afronding niet eenduidig onderbouwd')
         return cls
@@ -200,6 +225,15 @@ def ground_decision(cls, subject, latest):
     if not latest.strip() or len(cls.evidence.strip()) < 6 or _normalize(cls.evidence) not in _normalize(latest):
         return replace(cls, review_required=True,
                        reason='REVIEW_REQUIRED: modelbewijs niet letterlijk in nieuwste bericht: ' + cls.reason)
+    if cls.semantic_verified:
+        if (cls.message_intent != 'ACTION_REQUIRED' or cls.action_owner != 'OUR_ROLE' or
+                cls.action_timing not in ('CURRENT','ASSIGNED_FUTURE') or len(cls.action_summary) < 8 or
+                (cls.work_requested and cls.domain != 'PLAN') or
+                (cls.ei_relevant and cls.domain not in ('EI','PLAN'))):
+            return replace(cls, review_required=True, reason='REVIEW_REQUIRED: onvolledige semantische actieonderbouwing')
+        # A separate assessment agreed on the action and literal evidence.
+        # Vocabulary is context, never an exhaustive authorization whitelist.
+        return cls
     scope = (subject or '') + '\n' + latest
     if cls.work_requested:
         # A new inventory article is NOT an inspection/PO/maintenance plan.

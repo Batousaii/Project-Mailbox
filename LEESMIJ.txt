@@ -1,4 +1,4 @@
-EE-Reliability 1.8.0 — gespecialiseerde SAP PM / E&I-agent
+EE-Reliability 1.9.0 — gespecialiseerde SAP PM / E&I-agent
 
 GEBRUIK
 Pak de ZIP volledig uit, open klassieke Outlook met EE-Reliability en
@@ -15,7 +15,11 @@ app\agent\role_knowledge.json. Dit is een uitbreidbare startset, geen
 volledige woordenlijst voor elk SAP-systeem. Het bestaande Qwen-model krijgt
 relevante kennis per bericht; er is geen nieuw model getraind.
 
-Een begrip herkennen is geen opdracht herkennen. Qwen moet nog steeds
+Een begrip herkennen is geen opdracht herkennen. De benamingen zijn voorbeelden,
+geen whitelist. Twee overeenstemmende, onderbouwde semantische beoordelingen
+kunnen ook onbekende termen herkennen. Een actie vereist letterlijk bewijs,
+rol/eigenaar, timing en een concrete samenvatting. Bij tegenstelling volgt
+review. Dezelfde Qwen tweemaal gebruiken is geen onafhankelijke waarheid. Qwen moet nog steeds
 vaststellen wat de nieuwste boodschap vraagt en letterlijk bewijs geven.
 Onderwerp en historie kunnen verbanden verduidelijken, maar zijn geen nieuw
 bewijs. Purchase order is geen preventief onderhoudsplan; een gewone order
@@ -25,7 +29,7 @@ komt in de aparte werklijst; forwarding volgt onafhankelijk Hamza/E&I.
 Twijfel wordt zichtbaar bewaard, nooit vervangen door verzonnen zekerheid.
 
 INHOUDELIJKE TEST VOOR DE CODEWISSEL
-De updater voert eerst regressietests, echte prerequisites en 14 synthetische
+De updater voert eerst regressietests, echte prerequisites en 21 synthetische
 mails door de echte lokale Qwen uit. Hij toont per geval de voortgang. Dit
 kan op CPU meerdere minuten duren. De cases toetsen onder andere:
 - maintenance item met ontbrekende periodiciteit;
@@ -55,6 +59,12 @@ HISTORIE EN RESOURCEGEBRUIK
 Geen nieuwe baseline of historische bulkforward. SENT en UNKNOWN worden niet
 opnieuw verzonden. Bestaande onzekere plan-kandidaten kunnen eenmaal per
 beleidsversie rapport-only worden herbeoordeeld, zonder inhaalforwards.
+Oude onzekere berichten worden eenmaal per beleidsversie rapport-only
+herbeoordeeld. Korte eerdere gespreksrecords zijn context, geen nieuwe opdracht.
+Ondertekeningen en >-quotes worden gescheiden van de actuele boodschap.
+Een ontbrekende bijlage of te veel context leidt tot review, niet tot een
+verzonnen conclusie. review_queue.csv toont redenen, eigenaar en timing.
+
 Normale cyclus 12 uur; ongewijzigde verwerkte mails krijgen geen nieuwe
 AI-beoordeling. De kennislaag gebruikt alleen lokale JSON en standaard-Python,
 zonder embeddingmodel, vectorservice of tweede LLM. Het Qwen-model krijgt
@@ -63,7 +73,7 @@ zonder embeddingmodel, vectorservice of tweede LLM. Het Qwen-model krijgt
 en het bewaarde inhoudelijke testrapport.
 
 BEVESTIGING
-74 agenttests en 3 updatertests zijn hier geslaagd. De echte 14 Qwen-cases
+86 agenttests en 3 updatertests zijn hier geslaagd. De echte 21 Qwen-cases
 zijn NIET in deze Linux-cloud uitgevoerd: daar draait geen Ollama.
 De updater voert die op de doel-pc uit voordat de bestaande agent wordt
 vervangen. Windows-updater, echte modelkwaliteit, RAM/CPU, forwarding en
@@ -73,3 +83,16 @@ Voorwaardelijk planwerk zonder opdracht aan jouw rol wordt DEFERRED of
 OUT_OF_SCOPE met letterlijk bewijs; geen actieve werkopdracht of forward.
 Een expliciete opdracht aan jou om nu voor te bereiden blijft wel relevant,
 ook wanneer uitvoering later volgt. Onzeker eigenaarschap blijft review.
+
+Nieuw in 1.9.0: inhoudelijke herbeoordeling heeft maximaal twee generaties,
+met een contextvenster van 8192 tokens. Te veel context wordt niet stilzwijgend
+als volledig begrepen beschouwd. Geheugen, rolkennis en beoordelingen blijven
+lokaal. E-mailvelden zijn onbetrouwbare JSON-data; alleen de vaste executor kan
+naar de eerder toegestane ontvanger forwarden. Het model kan die ontvanger of
+zijn eigen verified-vlag niet kiezen. Dit voorkomt niet alle prompt-injecties.
+
+De 21 inhoudelijke cases toetsen naast domeinherkenning ook feitelijke
+forwardingbeslissing en al dan niet actieve werkitems, onbekende formuleringen,
+broninstructies, ondertekeningen en ontbrekende context. Het JSON-rapport telt
+onterechte/gemiste forwards en onverwachte/ontbrekende actieve werkitems.
+Zie AGENTONTWERP.md voor geraadpleegde research, keuzes en grenzen.

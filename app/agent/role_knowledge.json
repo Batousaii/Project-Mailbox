@@ -1,5 +1,5 @@
 {
-  "version": "1.8.0",
+  "version": "1.9.0",
   "role": "EE-Reliability: E&I-werk en SAP PM-onderhoudsplanning",
   "boundaries": [
     "Geen SAP-wijzigingen of toegang door deze mailagent.",
@@ -7,7 +7,8 @@
     "Beoordeel de nieuwste boodschap; onderwerp/historie verduidelijken alleen.",
     "Een genoemd begrip is geen opdracht. Niet zeker betekent REVIEW_REQUIRED.",
     "Kennis is een beheerbare startset, geen volledige SAP-ontologie en geen getraind model.",
-    "Toekomstige voorwaardelijke mogelijkheden en uitsluitend acties van andere partijen zijn geen huidige opdracht voor deze rol. Een concrete opdracht aan ons met een latere deadline blijft wel werk."
+    "Toekomstige voorwaardelijke mogelijkheden en uitsluitend acties van andere partijen zijn geen huidige opdracht voor deze rol. Een concrete opdracht aan ons met een latere deadline blijft wel werk.",
+    "De benamingen zijn voorbeelden, geen whitelist. Onbekende termen mogen worden begrepen met semantische onderbouwing; herkenning van een woord is geen actiebevoegdheid."
   ],
   "concepts": [
     {

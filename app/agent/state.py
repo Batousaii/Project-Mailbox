@@ -65,7 +65,8 @@ class State:
             self.db.execute("ALTER TABLE messages ADD COLUMN llm_domain TEXT NOT NULL DEFAULT 'UNCLEAR'")
         if 'llm_evidence' not in columns:
             self.db.execute("ALTER TABLE messages ADD COLUMN llm_evidence TEXT NOT NULL DEFAULT ''")
-        for name in ('message_intent', 'intent_evidence', 'plan_review_version'):
+        for name in ('message_intent', 'intent_evidence', 'plan_review_version',
+                     'action_summary','action_owner','action_timing','verification_note'):
             if name not in columns:
                 self.db.execute(f"ALTER TABLE messages ADD COLUMN {name} TEXT NOT NULL DEFAULT ''")
         if self.setting('completion_policy_version') != '1.7.1':
@@ -76,6 +77,26 @@ class State:
         self.db.execute("""UPDATE messages SET status='NEW',forward_decision=''
             WHERE status='READY' AND forward_decision='SEND_PLAN' AND send_token IS NULL""")
         self.db.commit()
+
+    def conversation_memory(self, msg):
+        """Bounded previous local records, context only; never new-action evidence."""
+        if not msg.get('conversation_id'):
+            return ''
+        rows=self.db.execute('''SELECT subject,status,plan_type,llm_evidence,message_intent
+            FROM messages WHERE conversation_id=? AND entry_id!=? AND llm_evidence!=''
+            ORDER BY received DESC LIMIT 3''',(msg['conversation_id'],msg['entry_id'])).fetchall()
+        if not rows:
+            return ''
+        context={'source':'PRIOR_LOCAL_AGENT_RECORDS_CONTEXT_ONLY',
+                 'warning':'Earlier generated decisions may be wrong; not proof of new work or completion.',
+                 'records':[]}
+        for row in rows:
+            record={k:str(v or '')[:220] for k,v in dict(row).items()}
+            context['records'].append(record)
+            if len(json.dumps(context,ensure_ascii=False))>1800:
+                context['records'].pop()
+                break
+        return json.dumps(context,ensure_ascii=False)
 
     def close(self):
         self.db.close()
@@ -118,11 +139,13 @@ class State:
             status = 'SKIPPED'
         self.db.execute('''UPDATE messages SET status=?,forward_decision=?,ai_reason=?,confidence=?,
           plan_type=?,plan_target=?,work_requested=?,review_required=?,system_message=?,plan_pending=?,
-          llm_domain=?,llm_evidence=?,message_intent=?,intent_evidence=?,error=''
+          llm_domain=?,llm_evidence=?,message_intent=?,intent_evidence=?,
+          action_summary=?,action_owner=?,action_timing=?,verification_note=?,error=''
           WHERE entry_id=? AND status IN ('NEW','REVIEW_REQUIRED','READY')''',
           (status, decision, cls.reason, cls.confidence, cls.plan_type, cls.plan_target,
            int(cls.work_requested), int(cls.review_required), int(system_message), int(plan_pending),
-           cls.domain, cls.evidence, cls.message_intent, cls.intent_evidence, entry_id))
+           cls.domain, cls.evidence, cls.message_intent, cls.intent_evidence,
+           cls.action_summary,cls.action_owner,cls.action_timing,cls.verification_note,entry_id))
         self.db.commit()
         self.audit('CLASSIFIED', entry_id, f'{decision}; category={self.row(entry_id)["categories"]!r}; domain={cls.domain}; evidence={cls.evidence!r}; reason={cls.reason}')
 
@@ -130,9 +153,11 @@ class State:
         # Do not change forwarding status: Hamza may already have been sent.
         self.db.execute('''UPDATE messages SET ai_reason=?,confidence=?,plan_type=?,
           plan_target=?,work_requested=?,review_required=?,plan_pending=0,
-          llm_domain=?,llm_evidence=?,message_intent=?,intent_evidence=? WHERE entry_id=?''',
+          llm_domain=?,llm_evidence=?,message_intent=?,intent_evidence=?,
+          action_summary=?,action_owner=?,action_timing=?,verification_note=? WHERE entry_id=?''',
           (cls.reason, cls.confidence, cls.plan_type, cls.plan_target,
-           int(cls.work_requested), int(cls.review_required), cls.domain, cls.evidence, cls.message_intent, cls.intent_evidence, entry_id))
+           int(cls.work_requested), int(cls.review_required), cls.domain, cls.evidence, cls.message_intent, cls.intent_evidence,
+           cls.action_summary,cls.action_owner,cls.action_timing,cls.verification_note,entry_id))
         self.db.commit()
         self.audit('DEFERRED_PLAN_AI_DONE', entry_id, f'{cls.plan_type}; confidence={cls.confidence}')
 
@@ -214,7 +239,10 @@ class State:
                                   'confidence,review_required,ai_reason,llm_domain,llm_evidence FROM messages '
                                   "WHERE plan_type != 'NONE' OR (review_required=1 AND status != 'HISTORICAL_IGNORE')", None),
             'mail_audit.csv': ('SELECT entry_id,received,subject,categories,status,forward_decision,confidence,'
-                               'ai_reason,llm_domain,llm_evidence,message_intent,intent_evidence,send_attempted,sent_at,error FROM messages', None),
+                               'ai_reason,llm_domain,llm_evidence,message_intent,intent_evidence,action_summary,'
+                               'action_owner,action_timing,verification_note,send_attempted,sent_at,error FROM messages', None),
+            'review_queue.csv': ("SELECT entry_id,received,subject,ai_reason,llm_evidence,action_summary,"
+                                 "action_owner,action_timing,verification_note FROM messages WHERE status='REVIEW_REQUIRED'",None),
         }
         for name,(q,_) in defs.items():
             rows = self.db.execute(q)

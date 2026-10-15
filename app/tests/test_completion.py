@@ -7,14 +7,14 @@ from agent.state import State
 from agent.rules import Decision,completed_notice,decide_forward,decode_classification,ground_decision,split_latest_message
 
 class CompletionTests(unittest.TestCase):
-    def test_completed_even_with_hamza_no_ai_send_or_work_item(self):
+    def test_completed_even_with_hamza_model_checked_no_send_or_work_item(self):
         for categories in ['', 'Hamza']:
             with self.subTest(categories=categories),tempfile.TemporaryDirectory() as td:
                 st=State(td);gw=FakeGateway();baseline(st,gw);st.set_setting('forward_enabled','1')
                 gw.add('done','RE: Roostervloeren','Het werk aan de roostervloeren is uitgevoerd zoals afgesproken.',categories)
-                with patch('agent.runner.ai.classify') as model,patch('agent.runner.ai.release_model'):
+                with patch('agent.runner.ai.classify', return_value=Decision(confidence=.95,message_intent='COMPLETED',intent_evidence=gw.bodies[gw.messages[-1]['entry_id']])) as model,patch('agent.runner.ai.release_model'):
                     scan(st,gw);scan(st,gw)
-                    model.assert_not_called()
+                    model.assert_called_once()
                 self.assertEqual([],gw.sent)
                 self.assertEqual('SUPPRESS_COMPLETED',st.row('done')['forward_decision'])
                 self.assertEqual('COMPLETED',st.row('done')['message_intent'])
@@ -56,8 +56,8 @@ class CompletionTests(unittest.TestCase):
             gw.add('pending','Werk','Het werk is uitgevoerd.','Hamza')
             st.metadata(gw.messages[0])
             st.classify('pending','SEND_HAMZA',Decision(review_required=True),False,plan_pending=True)
-            with patch('agent.runner.ai.classify') as model,patch('agent.runner.ai.release_model'):
+            with patch('agent.runner.ai.classify', return_value=Decision(confidence=.95,message_intent='COMPLETED',intent_evidence=gw.bodies[gw.messages[-1]['entry_id']])) as model,patch('agent.runner.ai.release_model'):
                 scan(st,gw)
-                model.assert_not_called()
+                model.assert_called_once()
             self.assertEqual([],gw.sent)
             self.assertEqual('SKIPPED',st.row('pending')['status']);st.close()

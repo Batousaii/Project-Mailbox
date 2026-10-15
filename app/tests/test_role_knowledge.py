@@ -54,6 +54,8 @@ class EvaluationTests(unittest.TestCase):
             report=json.loads(output.read_text())
             self.assertGreater(report['failed'],0)
             self.assertEqual(len(role_eval.CASES),len(report['results']))
+            self.assertEqual(sum(case[3] for case in role_eval.CASES),report['missed_forwards'])
+            self.assertEqual(sum(case[4]!='NONE' for case in role_eval.CASES),report['missed_work_items'])
 
     def test_identical_passed_report_reused_but_changed_model_is_tested(self):
         with tempfile.TemporaryDirectory() as td,patch('agent.role_eval.model_digest',return_value='same'),patch('agent.role_eval.ai.classify',return_value=Decision()) as classify,patch('agent.role_eval.ai.release_model'):

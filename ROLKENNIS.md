@@ -1,4 +1,4 @@
-# Rolkennis 1.8.0
+# Rolkennis 1.9.0
 
 EE-Reliability: E&I-werk en SAP PM-onderhoudsplanning
 
@@ -31,3 +31,8 @@ Timing en eigenaarschap: een toekomstige mogelijkheid na een externe
 mijlpaal en zonder taak voor jouw rol is DEFERRED/OUT_OF_SCOPE, geen huidige
 forward of actief werkitem. Een concrete voorbereidingsopdracht aan jou is
 wel actie, ook bij latere uitvoering. Onduidelijkheid wordt niet ingevuld.
+
+De voorbeelden zijn geen gesloten whitelist. Semantisch onderbouwde herkenning
+van nieuwe termen kan de lexicale controle overrulen na twee overeenstemmende
+beoordelingen met bewijs, eigenaar en timing. Beide beoordelingen gebruiken
+hetzelfde model, dus kunnen dezelfde fout maken.
