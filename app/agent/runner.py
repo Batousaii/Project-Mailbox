@@ -12,7 +12,7 @@ import uuid
 
 from . import ai
 from .visible_inbox import VisibleInboxGateway as OutlookGateway
-from .rules import Decision, RECIPIENT, completed_notice, decide_forward, has_hamza_category, is_system_message, split_latest_message
+from .rules import Decision, RECIPIENT, POLICY_VERSION, completed_notice, decide_forward, has_hamza_category, is_system_message, plan_review_candidate, split_latest_message
 from .state import State, data_dir, utc_now
 
 LOG = logging.getLogger('ee_reliability')
@@ -111,7 +111,10 @@ def _scan(st, gw, allow_send=True):
                 st.db.execute("UPDATE messages SET status='NEW' WHERE entry_id=?", (msg['entry_id'],))
                 st.db.commit()
                 row = st.row(msg['entry_id'])
-        deferred = bool(row['plan_pending'])
+        review_plan = (row['status'] == 'REVIEW_REQUIRED' and row['send_token'] is None
+                       and row['plan_review_version'] != POLICY_VERSION
+                       and plan_review_candidate(msg['subject'], row['llm_evidence']))
+        deferred = bool(row['plan_pending']) or review_plan
         if row['status'] not in ('NEW',) and not deferred:
             continue
         try:
@@ -124,10 +127,10 @@ def _scan(st, gw, allow_send=True):
             latest, context = split_latest_message(details['body'])
             completed = completed_notice(latest) if not system else None
             if completed is not None:
-                if deferred:
-                    st.complete_deferred_plan(msg['entry_id'], completed)
-                else:
+                if row['status'] in ('NEW','READY','REVIEW_REQUIRED') and row['send_token'] is None:
                     st.classify(msg['entry_id'], decide_forward(msg['categories'], False, completed), completed, False)
+                elif deferred:
+                    st.complete_deferred_plan(msg['entry_id'], completed)
                 continue
             if deferred:
                 if ai_unavailable:
@@ -139,8 +142,16 @@ def _scan(st, gw, allow_send=True):
                     ai_unavailable = True
                     raise
                 st.complete_deferred_plan(msg['entry_id'], cls)
+                if row['status'] == 'READY' and row['send_token'] is None and cls.message_intent in ('COMPLETED','STATUS_ONLY') and not cls.review_required:
+                    st.classify(msg['entry_id'], decide_forward(msg['categories'], False, cls), cls, False)
                 if cls.work_requested:
                     st.add_work_item(msg, cls, latest)
+                if review_plan:
+                    st.db.execute('UPDATE messages SET plan_review_version=? WHERE entry_id=?',
+                                  (POLICY_VERSION,msg['entry_id']))
+                    st.db.commit()
+                    st.audit('PLAN_REVIEW_REASSESSED', msg['entry_id'],
+                             'Report-only reassessment; no catch-up forward; '+cls.reason)
                 continue
             if system:
                 cls = Decision(reason='System-mail suppressed')
@@ -163,6 +174,10 @@ def _scan(st, gw, allow_send=True):
                 st.audit('PLAN_AI_DEFERRED', msg['entry_id'], str(ai_exc))
             decision = decide_forward(msg['categories'], False, cls)
             st.classify(msg['entry_id'], decision, cls, False, plan_pending=plan_pending)
+            if plan_review_candidate(msg['subject'], latest):
+                st.db.execute('UPDATE messages SET plan_review_version=? WHERE entry_id=?',
+                              (POLICY_VERSION,msg['entry_id']))
+                st.db.commit()
             if cls.work_requested:
                 st.add_work_item(msg, cls, latest)
             st.audit('CATEGORY_AND_LLM_V15', msg['entry_id'],

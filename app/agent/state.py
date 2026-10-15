@@ -65,7 +65,7 @@ class State:
             self.db.execute("ALTER TABLE messages ADD COLUMN llm_domain TEXT NOT NULL DEFAULT 'UNCLEAR'")
         if 'llm_evidence' not in columns:
             self.db.execute("ALTER TABLE messages ADD COLUMN llm_evidence TEXT NOT NULL DEFAULT ''")
-        for name in ('message_intent', 'intent_evidence'):
+        for name in ('message_intent', 'intent_evidence', 'plan_review_version'):
             if name not in columns:
                 self.db.execute(f"ALTER TABLE messages ADD COLUMN {name} TEXT NOT NULL DEFAULT ''")
         if self.setting('completion_policy_version') != '1.7.1':

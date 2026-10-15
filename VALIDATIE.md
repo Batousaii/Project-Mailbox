@@ -61,3 +61,19 @@ de exacte oorzaak van de vroegere verzending is dus niet vastgesteld.
 aangeleverde Windows-uitvoer bevestigd als RUNNING met geslaagde scan en
 forwarding enabled; nieuwe classificaties en modelkwaliteit moeten nog
 op Windows met echte berichten gevalideerd worden.
+
+
+1.7.2: onderhoudsitem- en intervalcorrecties krijgen expliciete promptinstructies,
+herkenning van aan-te-passen-formuleringen en maximaal een tweede semantische
+beoordeling bij een negatief antwoord over mogelijk planwerk. Vier nieuwe tests
+controleren verkorte intervalcorrectie met letterlijk bewijs, herstel van een
+negatieve modelbeoordeling, geen extra call voor afgerond werk en eenmalige
+herbeoordeling van bestaande REVIEW_REQUIRED-kandidaten zonder inhaalforwards.
+64 agenttests en 3 updatertests slagen. Geen echte mailbox- of modeltest in deze
+cloud; de inhoud van de gemiste mail is alleen als auditfragment beschikbaar.
+De AI kan ambiguiteit nog steeds naar review verwijzen. De voorbeeld-ID in de
+nieuwe regressietest is fictief.
+
+Een extra regressietest controleert dat een al klaargezette Hamza-mail met
+uitgestelde AI-beoordeling alsnog uit de verzendqueue verdwijnt als de
+nieuwste tekst ondubbelzinnig afgerond werk meldt.

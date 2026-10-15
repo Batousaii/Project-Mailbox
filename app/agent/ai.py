@@ -1,5 +1,6 @@
 """Evidence-grounded local Ollama classification for EE-Reliability policy v1.5."""
 import json
+from dataclasses import replace
 import urllib.request
 import urllib.error
 import os
@@ -7,7 +8,7 @@ import shutil
 import subprocess
 import time
 from pathlib import Path
-from .rules import MODEL, decode_classification, ground_decision
+from .rules import MODEL, decode_classification, ground_decision, plan_review_candidate
 
 BASE_URL = 'http://127.0.0.1:11434'
 
@@ -43,6 +44,13 @@ B) Concrete opdracht om een INSPECTIEPLAN, PO-PLAN of ONDERHOUDSPLAN AAN TE MAKE
    of een BESTAAND plan AAN TE PASSEN / WIJZIGEN / AANVULLEN / STOPPEN.
    domain=PLAN, work_requested=true, plan_type CREATE_PLAN of MODIFY_PLAN.
    Ook mechanische assets mogen, zolang een echt PLAN de opdracht is.
+   Ook correctie van een maintenance item / onderhoudsitem, tekst, periodiciteit,
+   frequentie, interval of planregel kan MODIFY_PLAN zijn. Beoordeel verkorte
+   NL/EN-verzoeken in samenhang: een correctieonderwerp met een nieuwste boodschap
+   over ontbrekende periodiciteit en een voorgesteld interval kan een wijziging
+   vragen zonder het werkwoord 'aanpassen'. Ontbrekende context => review.
+   'Gelieve PO plan aan te passen, regel mag eruit' is een planwijziging,
+   ook voor mechanische assets. Een plan slechts noemen is geen opdracht.
 
 UITSLUITEN (ei_relevant=false, work_requested=false):
 - Aanvraag magazijnartikel, aankoopartikel, nieuwe spare, voorraad of SAP artikel zonder
@@ -94,14 +102,30 @@ def classify(subject, latest, context):
     prompt = (f'ONDERWERP (context, geen bewijs): {subject[:500]}\n\n'
               f'NIEUWSTE BERICHT (enige bron voor bewijs):\n{latest}\n\n'
               f'GECITEERDE HISTORIE (uitsluitend ter verduidelijking):\n{context}')
-    resp = generate({
+    body = {
         'model':MODEL,'system':SYSTEM_PROMPT,'prompt':prompt,
         'format':'json','think':False,'stream':False,'keep_alive':'30s',
         'options':{'temperature':0,'num_predict':500},
-    }, timeout=180)
+    }
+    resp = generate(body, timeout=180)
     if not resp.get('done'):
         raise RuntimeError('Modelantwoord niet voltooid')
-    return ground_decision(decode_classification(resp.get('response','')),subject,latest)
+    decision = ground_decision(decode_classification(resp.get('response','')),subject,latest)
+    if not decision.work_requested and decision.message_intent not in ('COMPLETED','STATUS_ONLY') and plan_review_candidate(subject, latest):
+        # One bounded extra call only for contradictory or easily missed plan intents.
+        body['prompt'] += ('\n\nHERCONTROLE: de eerste beoordeling vond geen planwerk. '
+            'Controleer specifiek of de NIEUWSTE boodschap een nieuw of gewijzigd '
+            'maintenance item, planregel, tekst of interval vraagt. Mechanisch is '
+            'geen uitsluitingsgrond voor planwerk. Citeer de nieuwste boodschap; '
+            'verzin geen ontbrekende opdracht. Gebruik hetzelfde JSON-schema.')
+        retry = generate(body, timeout=180)
+        if not retry.get('done'):
+            raise RuntimeError('Planhercontrole niet voltooid')
+        decision = ground_decision(decode_classification(retry.get('response','')), subject, latest)
+        if not decision.work_requested and decision.message_intent not in ('COMPLETED','STATUS_ONLY'):
+            decision = replace(decision, review_required=True,
+                               reason='REVIEW_REQUIRED: mogelijk planwijzigingsverzoek na hercontrole; '+decision.reason)
+    return decision
 
 
 def release_model():

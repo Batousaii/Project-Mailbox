@@ -88,7 +88,7 @@ def status(st):
     except Exception:
         checks['last_full_mailbox_audit'] = 'NOT_COMPLETED'
     checks.update({
-        'integrated_audit_version': '1.7.1',
+        'integrated_audit_version': '1.7.2',
         'forwarding_policy_version': POLICY_VERSION,
         'baseline': st.setting('baseline_completed','0') == '1',
         'historical_count': st.counts().get('HISTORICAL_IGNORE', 0),

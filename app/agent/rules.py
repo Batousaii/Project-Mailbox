@@ -12,7 +12,7 @@ TARGET_MAILBOX = 'EE-Reliability'
 RECIPIENT = 'hamza.elmakhtari@kuraray.com'
 MODEL = 'qwen3:4b'
 MIN_CONFIDENCE_EXCLUSIVE = 0.80
-POLICY_VERSION = '1.7.1'
+POLICY_VERSION = '1.7.2'
 
 _QUOTE_LINES = [
     re.compile(r'^\s*-{2,}\s*(?:original message|oorspronkelijk bericht)\s*-{2,}', re.I),
@@ -46,13 +46,13 @@ _MECHANICAL_SIGNAL = re.compile(
     r'vlotter\w*|flexibel\w*|hose\w*|slang\w*)\b', re.I)
 _PLAN_ACTION = re.compile(
     r'\b(?:aanvraag|aanvragen|aangevraagd|opzetten|aanmaken|maak|maken|'
-    r'wijzig\w*|aanpas\w*|bijwerk\w*|uitbreid\w*|uitbreiden|toevoeg\w*|'
+    r'aan\s+te\s+passen|mag\s+eruit|correct\w*|corrig\w*|wijzig\w*|aanpas\w*|bijwerk\w*|uitbreid\w*|uitbreiden|toevoeg\w*|'
     r'stop\w*|afschaf\w*|verwijder\w*|update\w*|create\w*|set\s+up|'
     r'please|could\s+you|can\s+you|modify\w*|amend\w*|change\w*|'
     r'revise\w*|extend\w*)\b',re.I)
 _PLAN_SIGNAL = re.compile(
     r'\b(?:inspectie\s*plan\w*|inspectieplannen|inspection\s+plan\w*|'
-    r'po\s*[- ]\s*plan\w*|onderhouds\s*plan\w*|maintenance\s+plan\w*|'
+    r'po\s*[- ]\s*plan\w*|onderhouds\s*plan\w*|maintenance\s+plan\w*|maintenance\s+item\w*|onderhoudsitem\w*|'
     r'preventive\s+maintenance\s+plan\w*|preventief\s+onderhouds\s*plan\w*)\b',re.I)
 
 
@@ -132,6 +132,19 @@ def completed_notice(latest):
     return None
 
 
+_PLAN_CHANGE_DETAIL = re.compile(r'\b(?:zonder|missing|incorrect|wrong|ontbrekende)\s+(?:de\s+)?(?:periodiciteit|periodicity|interval|frequentie)|\b(?:periodiciteit|interval|frequentie)\s+ontbreekt\b', re.I)
+
+
+def plan_review_candidate(subject, latest):
+    """Request a second semantic review, never authorize work or sending by keywords."""
+    if completed_notice(latest):
+        return False
+    scope = (subject or '') + '\n' + (latest or '')
+    return bool(_PLAN_SIGNAL.search(scope) and
+                (_PLAN_ACTION.search(latest or '') or _PLAN_CHANGE_DETAIL.search(latest or '') or
+                 re.search(r'\b(?:correctie|correction|aanpassing|wijziging)\b', subject or '', re.I)))
+
+
 def decode_classification(raw):
     try:
         if isinstance(raw, str):
@@ -189,7 +202,8 @@ def ground_decision(cls, subject, latest):
     scope = (subject or '') + '\n' + latest
     if cls.work_requested:
         # A new inventory article is NOT an inspection/PO/maintenance plan.
-        if cls.domain != 'PLAN' or not _PLAN_SIGNAL.search(scope) or not _PLAN_ACTION.search(latest):
+        correction_detail = _PLAN_ACTION.search(subject or '') and _PLAN_CHANGE_DETAIL.search(latest)
+        if cls.domain != 'PLAN' or not _PLAN_SIGNAL.search(scope) or not (_PLAN_ACTION.search(latest) or correction_detail):
             return replace(cls, review_required=True,
                            reason='REVIEW_REQUIRED: concrete planidentificatie ontbreekt: ' + cls.reason)
     if cls.ei_relevant:

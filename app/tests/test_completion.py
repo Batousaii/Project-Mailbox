@@ -49,3 +49,15 @@ class CompletionTests(unittest.TestCase):
         cls=Decision(confidence=.95,message_intent='COMPLETED',intent_evidence='Het werk is uitgevoerd.')
         cls=ground_decision(cls,'Werk',body)
         self.assertEqual('REVIEW_REQUIRED',decide_forward('Hamza',False,cls))
+
+    def test_completed_pending_hamza_is_removed_from_send_queue(self):
+        with tempfile.TemporaryDirectory() as td:
+            st=State(td);gw=FakeGateway();baseline(st,gw);st.set_setting('forward_enabled','1')
+            gw.add('pending','Werk','Het werk is uitgevoerd.','Hamza')
+            st.metadata(gw.messages[0])
+            st.classify('pending','SEND_HAMZA',Decision(review_required=True),False,plan_pending=True)
+            with patch('agent.runner.ai.classify') as model,patch('agent.runner.ai.release_model'):
+                scan(st,gw)
+                model.assert_not_called()
+            self.assertEqual([],gw.sent)
+            self.assertEqual('SKIPPED',st.row('pending')['status']);st.close()
