@@ -20,11 +20,16 @@ function AgentProcesses {
         $_.CommandLine -match 'agent\.cli\s+daemon' })
 }
 function Stop-Agent {
+    New-Item -ItemType File -Force -Path (Join-Path $root 'data\stop.request') | Out-Null
+    for ($n=0;$n -lt 30 -and @(AgentProcesses).Count -gt 0;$n++) { Start-Sleep -Seconds 2 }
+    # Old releases lack cooperative stop. Target only known agent processes;
+    # interrupted SEND_PENDING is recovered as UNKNOWN, never retried.
     foreach ($p in @(AgentProcesses)) { Stop-Process -Id $p.ProcessId -Force }
     Start-Sleep -Seconds 2
     if (@(AgentProcesses).Count -gt 0) { throw 'Agent could not be stopped safely' }
 }
 function Start-Agent {
+    Remove-Item (Join-Path $root 'data\stop.request') -ErrorAction SilentlyContinue
     if (@(AgentProcesses).Count -eq 0) {
         Start-Process -FilePath $pythonw -ArgumentList '-m agent.cli daemon' -WorkingDirectory $app -WindowStyle Hidden | Out-Null
     }
@@ -62,7 +67,8 @@ try {
     $ready = $false
     for ($i=0;$i -lt 60;$i++) {
         Start-Sleep -Seconds 5
-        if (@(AgentProcesses).Count -eq 0) { throw 'New agent exited' }
+        Remove-Item (Join-Path $root 'data\stop.request') -ErrorAction SilentlyContinue
+    if (@(AgentProcesses).Count -eq 0) { throw 'New agent exited' }
         $previousPreference = $ErrorActionPreference
         try {
             $ErrorActionPreference = 'Continue'
@@ -100,3 +106,4 @@ try {
     Write-Host ('Diagnostic/backup directory: ' + $backup)
     exit 1
 }
+

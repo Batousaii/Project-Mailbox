@@ -13,7 +13,7 @@ TARGET_MAILBOX = 'EE-Reliability'
 RECIPIENT = 'hamza.elmakhtari@kuraray.com'
 MODEL = 'qwen3:4b'
 MIN_CONFIDENCE_EXCLUSIVE = 0.80
-POLICY_VERSION = '1.9.0'
+POLICY_VERSION = '2.0.0'
 
 _QUOTE_LINES = [
     re.compile(r'^\s*-{2,}\s*(?:original message|oorspronkelijk bericht)\s*-{2,}', re.I),
@@ -271,3 +271,4 @@ def decide_forward(categories, system_message, cls):
     if cls.ei_relevant and cls.domain in ('EI', 'PLAN'):
         return 'SEND_EI'
     return 'SKIP_NOT_RELEVANT'
+

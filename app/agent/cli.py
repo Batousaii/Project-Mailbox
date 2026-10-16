@@ -88,7 +88,7 @@ def status(st):
     except Exception:
         checks['last_full_mailbox_audit'] = 'NOT_COMPLETED'
     checks.update({
-        'integrated_audit_version': '1.9.0',
+        'integrated_audit_version': '2.0.0',
         'forwarding_policy_version': POLICY_VERSION,
         'baseline': st.setting('baseline_completed','0') == '1',
         'historical_count': st.counts().get('HISTORICAL_IGNORE', 0),
@@ -102,7 +102,10 @@ def status(st):
         'forwarding': 'ENABLED' if st.setting('forward_enabled','0') == '1' else 'DISABLED (approval required)',
         'counts': st.counts(),
         'work_items': st.db.execute('SELECT COUNT(*) FROM work_items').fetchone()[0],
-        'unknown_sends': len(st.unknown_rows()),
+        'unconfirmed_sends': len(st.unknown_rows()),
+        'unknown_sends': st.counts().get('UNKNOWN',0),
+        'submitted_sends': st.counts().get('SUBMITTED',0),
+        'sent_definition': 'Sent Items trace confirmed; recipient delivery requires separate confirmation',
         'reports_dir': str(st.root),
     })
     from .role_knowledge import load
@@ -158,7 +161,7 @@ def activate(st):
     gw = OutlookGateway()
     # Safe classification (never sends while disabled).
     scan(st, gw, allow_send=False)
-    tests = [r for r in st.ready() if 'EE-AGENT-TEST' in (r['subject'] or '').upper()
+    tests = [r for r in st.db.execute("SELECT * FROM messages WHERE status IN ('READY','SENT','SUBMITTED','UNKNOWN') ORDER BY received") if 'EE-AGENT-TEST' in (r['subject'] or '').upper()
              and has_hamza_category(r['categories'])]
     if not tests:
         print('\nGEEN testbericht gevonden. Maak na de baseline een NIEUW bericht in de')
@@ -173,7 +176,7 @@ def activate(st):
     key = input('\nTyp exact TESTFORWARD GOEDGEKEURD om te versturen en te activeren: ').strip()
     if key != 'TESTFORWARD GOEDGEKEURD':
         raise RuntimeError('Geen expliciete goedkeuring; niets verzonden')
-    if not send_one(st, gw, test):
+    if test['send_token'] is None and not send_one(st, gw, test):
         raise RuntimeError('Test-forward heeft onzekere uitkomst; forwarding blijft UIT. Controleer audit/Sent Items.')
     print('Outlook accepteerde de forward; controle op verzonden kopie...')
     token = st.row(test['entry_id'])['send_token']
@@ -186,6 +189,10 @@ def activate(st):
     if not found:
         st.audit('TEST_SEND_NOT_VERIFIED', test['entry_id'], 'Sent Items contains no trace; activation blocked')
         raise RuntimeError('Verzonden kopie niet bevestigd. Geen activatie; test-mail NIET opnieuw verzenden.')
+    st.sent(test['entry_id'],token)
+    received = input('Bevestig werkelijke ontvangst: typ TEST ONTVANGEN: ').strip()
+    if received != 'TEST ONTVANGEN':
+        raise RuntimeError('Ontvangst niet bevestigd; forwarding blijft UIT. De test wordt niet opnieuw verstuurd.')
     st.set_setting('forward_enabled','1')
     st.set_setting('activated_at', utc_now())
     st.audit('FORWARDING_ACTIVATED', detail='Expliciete goedkeuring + testmail Sent Items bevestigd')
@@ -244,3 +251,4 @@ if __name__ == '__main__':
     except Exception as exc:
         print('FOUT:', str(exc),file=sys.stderr)
         sys.exit(1)
+

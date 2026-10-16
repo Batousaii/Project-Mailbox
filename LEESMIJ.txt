@@ -1,4 +1,4 @@
-EE-Reliability 1.9.0 — gespecialiseerde SAP PM / E&I-agent
+EE-Reliability 2.0.0 — gespecialiseerde SAP PM / E&I-agent
 
 GEBRUIK
 Pak de ZIP volledig uit, open klassieke Outlook met EE-Reliability en
@@ -73,7 +73,7 @@ zonder embeddingmodel, vectorservice of tweede LLM. Het Qwen-model krijgt
 en het bewaarde inhoudelijke testrapport.
 
 BEVESTIGING
-86 agenttests en 3 updatertests zijn hier geslaagd. De echte 21 Qwen-cases
+95 agenttests en 3 updatertests zijn hier geslaagd. De echte 21 Qwen-cases
 zijn NIET in deze Linux-cloud uitgevoerd: daar draait geen Ollama.
 De updater voert die op de doel-pc uit voordat de bestaande agent wordt
 vervangen. Windows-updater, echte modelkwaliteit, RAM/CPU, forwarding en
@@ -84,7 +84,7 @@ OUT_OF_SCOPE met letterlijk bewijs; geen actieve werkopdracht of forward.
 Een expliciete opdracht aan jou om nu voor te bereiden blijft wel relevant,
 ook wanneer uitvoering later volgt. Onzeker eigenaarschap blijft review.
 
-Nieuw in 1.9.0: inhoudelijke herbeoordeling heeft maximaal twee generaties,
+Overgenomen uit 1.9.0: inhoudelijke herbeoordeling heeft maximaal twee generaties,
 met een contextvenster van 8192 tokens. Te veel context wordt niet stilzwijgend
 als volledig begrepen beschouwd. Geheugen, rolkennis en beoordelingen blijven
 lokaal. E-mailvelden zijn onbetrouwbare JSON-data; alleen de vaste executor kan
@@ -96,3 +96,7 @@ forwardingbeslissing en al dan niet actieve werkitems, onbekende formuleringen,
 broninstructies, ondertekeningen en ontbrekende context. Het JSON-rapport telt
 onterechte/gemiste forwards en onverwachte/ontbrekende actieve werkitems.
 Zie AGENTONTWERP.md voor geraadpleegde research, keuzes en grenzen.
+
+
+Nieuw in 2.0.0: zie README.md en ACCEPTATIE-2.0.md voor SUBMITTED/SENT,
+ontvangstbevestiging, rustige stop, installatiebediening en de extra regressietests.

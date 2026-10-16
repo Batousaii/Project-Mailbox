@@ -107,7 +107,8 @@ def request_json(endpoint, body=None, timeout=20):
     headers = {'Content-Type': 'application/json'}
     data = json.dumps(body, ensure_ascii=False).encode('utf-8') if body is not None else None
     req = urllib.request.Request(BASE_URL + endpoint, data=data, headers=headers)
-    with urllib.request.urlopen(req, timeout=timeout) as res:
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    with opener.open(req, timeout=timeout) as res:
         return json.loads(res.read().decode('utf-8'))
 
 
@@ -279,3 +280,4 @@ def generate(body, timeout=180):
             raise
         ensure_server()
         return request_json('/api/generate', body, timeout=timeout)
+

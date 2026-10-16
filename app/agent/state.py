@@ -26,6 +26,7 @@ class State:
         self.db = sqlite3.connect(str(self.root / 'agent.db'), timeout=30)
         self.db.row_factory = sqlite3.Row
         self.db.execute('PRAGMA journal_mode=WAL')
+        self.db.execute('PRAGMA synchronous=FULL')
         self.db.execute('PRAGMA busy_timeout=30000')
         self.db.executescript('''
         CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -192,15 +193,20 @@ class State:
         self.audit('SEND_PENDING', entry_id, f'token={token}')
         return True
 
+    def submitted(self, entry_id, token):
+        with self.db:
+            self.db.execute("UPDATE messages SET status='SUBMITTED' WHERE entry_id=? AND send_token=? AND status='SEND_PENDING'", (entry_id,token))
+        self.audit('SUBMITTED',entry_id,f'token={token}; Outlook accepted, Sent Items not yet verified')
+
     def sent(self, entry_id, token):
         with self.db:
             self.db.execute('''UPDATE messages SET status='SENT',sent_at=?,error=''
-                               WHERE entry_id=? AND send_token=? AND status IN ('SEND_PENDING','UNKNOWN')''',
+                               WHERE entry_id=? AND send_token=? AND status IN ('SEND_PENDING','SUBMITTED','UNKNOWN')''',
                             (utc_now(), entry_id, token))
         self.audit('SENT', entry_id, f'token={token}')
 
     def unknown(self, entry_id, reason):
-        self.db.execute("UPDATE messages SET status='UNKNOWN',error=? WHERE entry_id=? AND status='SEND_PENDING'",
+        self.db.execute("UPDATE messages SET status='UNKNOWN',error=? WHERE entry_id=? AND status IN ('SEND_PENDING','SUBMITTED')",
                         (str(reason)[:500], entry_id))
         self.db.commit()
         self.audit('UNKNOWN', entry_id, reason)
@@ -215,7 +221,7 @@ class State:
         return self.db.execute("SELECT * FROM messages WHERE status='READY' AND forward_decision IN ('SEND_HAMZA','SEND_EI') ORDER BY received").fetchall()
 
     def unknown_rows(self):
-        return self.db.execute("SELECT * FROM messages WHERE status='UNKNOWN' AND send_token IS NOT NULL").fetchall()
+        return self.db.execute("SELECT * FROM messages WHERE status IN ('UNKNOWN','SUBMITTED') AND send_token IS NOT NULL").fetchall()
 
     def counts(self):
         return {r['status']: r['n'] for r in self.db.execute('SELECT status,COUNT(*) n FROM messages GROUP BY status')}
@@ -250,7 +256,7 @@ class State:
             with (self.root / name).open('w', encoding='utf-8-sig', newline='') as f:
                 writer = csv.writer(f, delimiter=';')
                 writer.writerow(columns)
-                writer.writerows(tuple(row) for row in rows)
+                writer.writerows(tuple("'"+v if isinstance(v,str) and v.startswith(('=','+','-','@')) else v for v in row) for row in rows)
 
     def monthly_open_report(self):
         """Only agent-confirmed sent = handled; not proof of business completion."""
@@ -262,7 +268,8 @@ class State:
         with (self.root / 'unhandled_30_days.csv').open('w', newline='', encoding='utf-8-sig') as f:
             w = csv.writer(f, delimiter=';')
             w.writerow(['EntryID','Received','Subject','Categories','Status','Decision'])
-            w.writerows(tuple(r) for r in rows)
+            w.writerows(tuple("'"+v if isinstance(v,str) and v.startswith(('=','+','-','@')) else v for v in r) for r in rows)
         self.set_setting('monthly_report_at', utc_now())
         self.audit('MONTHLY_CHECK', detail=f'Possible unhandled: {len(rows)}; HISTORICAL_IGNORE not assessed')
         return len(rows)
+
