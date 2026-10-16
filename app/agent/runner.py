@@ -78,7 +78,9 @@ def send_one(st, gw, row):
     try:
         gw.forward(row['entry_id'], row['store_id'], RECIPIENT, token)
         # Outlook .Send() indicates submission, NOT confirmed recipient delivery.
-        st.sent(row['entry_id'], token)
+        st.submitted(row['entry_id'], token)
+        if gw.sent_copy_exists(token):
+            st.sent(row['entry_id'], token)
         return True
     except Exception as exc:
         # Ambiguous on .Send exception: no blind retry, even after restart.
@@ -267,7 +269,7 @@ def daemon():
     worker.start()
     last_successful_scan = 0.0
     try:
-        while True:
+        while not (st.root/'stop.request').exists():
             now = time.monotonic()
             trigger = st.root / 'scan.trigger'
             forced = trigger.exists()
@@ -304,6 +306,10 @@ def daemon():
     finally:
         stop.set()
         worker.join(timeout=50)
-        st.close()
+        try:
+            (st.root/'runtime.json').unlink(missing_ok=True)
+        finally:
+            st.close()
         if mutex:
             close_mutex(mutex)
+

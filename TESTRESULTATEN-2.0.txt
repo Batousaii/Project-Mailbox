@@ -1,0 +1,194 @@
+Linux-cloudtest, 16 oktober 2026. Gesimuleerde AI/Outlook, geen echte mail.
+
+test_completed_claim_with_direct_new_request_requires_review (test_completion.CompletionTests.test_completed_claim_with_direct_new_request_requires_review) ... ok
+test_completed_even_with_hamza_model_checked_no_send_or_work_item (test_completion.CompletionTests.test_completed_even_with_hamza_model_checked_no_send_or_work_item) ... ok
+test_completed_pending_hamza_is_removed_from_send_queue (test_completion.CompletionTests.test_completed_pending_hamza_is_removed_from_send_queue) ... ok
+test_completed_with_new_action_not_suppressed (test_completion.CompletionTests.test_completed_with_new_action_not_suppressed) ... ok
+test_model_status_only_with_literal_evidence_no_hamza_forward (test_completion.CompletionTests.test_model_status_only_with_literal_evidence_no_hamza_forward) ... ok
+test_quoted_old_request_does_not_reopen_done_work (test_completion.CompletionTests.test_quoted_old_request_does_not_reopen_done_work) ... ok
+test_deferred_answer_does_not_trigger_plan_retry (test_deferred_scope.ScopeTests.test_deferred_answer_does_not_trigger_plan_retry) ... ok
+test_future_other_owner_is_not_active_work_or_forward_even_hamza (test_deferred_scope.ScopeTests.test_future_other_owner_is_not_active_work_or_forward_even_hamza) ... ok
+test_unfounded_future_claim_requires_review (test_deferred_scope.ScopeTests.test_unfounded_future_claim_requires_review) ... ok
+test_absent_old_agent_needs_no_backup (test_legacy.LegacyBackupTests.test_absent_old_agent_needs_no_backup) ... ok
+test_non_folder_stops_without_modifying (test_legacy.LegacyBackupTests.test_non_folder_stops_without_modifying) ... ok
+test_verified_snapshot_retains_original_and_all_audits (test_legacy.LegacyBackupTests.test_verified_snapshot_retains_original_and_all_audits) ... ok
+test_hamza_category_applied_after_initial_classification (test_pipeline.PipelineTests.test_hamza_category_applied_after_initial_classification) ... Model release unavailable; automatic 30s expiry remains configured
+Model release unavailable; automatic 30s expiry remains configured
+ok
+test_hamza_forwards_during_ai_outage_then_plan_work_recovers (test_pipeline.PipelineTests.test_hamza_forwards_during_ai_outage_then_plan_work_recovers) ... Model release unavailable; automatic 30s expiry remains configured
+Model release unavailable; automatic 30s expiry remains configured
+ok
+test_real_pipeline_rules_with_fake_ai_and_outlook (test_pipeline.PipelineTests.test_real_pipeline_rules_with_fake_ai_and_outlook) ... Model release unavailable; automatic 30s expiry remains configured
+Model release unavailable; automatic 30s expiry remains configured
+ok
+test_bounded_semantic_retry_for_false_negative (test_plan_corrections.CorrectionTests.test_bounded_semantic_retry_for_false_negative) ... ok
+test_implicit_frequency_correction_requires_model_and_literal_evidence (test_plan_corrections.CorrectionTests.test_implicit_frequency_correction_requires_model_and_literal_evidence) ... ok
+test_old_review_reassessed_once_into_workitem_without_catchup_send (test_plan_corrections.CorrectionTests.test_old_review_reassessed_once_into_workitem_without_catchup_send) ... ok
+test_status_or_completed_does_not_trigger_second_call (test_plan_corrections.CorrectionTests.test_status_or_completed_does_not_trigger_second_call) ... ok
+test_actual_ai_parsing_has_evidence_guards (test_policy_v15.PolicyTests.test_actual_ai_parsing_has_evidence_guards) ... ok
+test_article_request_is_not_plan (test_policy_v15.PolicyTests.test_article_request_is_not_plan) ... ok
+test_ei_spare_requested (test_policy_v15.PolicyTests.test_ei_spare_requested) ... ok
+test_hamza_category_overrides_mechanical (test_policy_v15.PolicyTests.test_hamza_category_overrides_mechanical) ... ok
+test_mechanical_spares_never_forward_without_ei (test_policy_v15.PolicyTests.test_mechanical_spares_never_forward_without_ei) ... ok
+test_plan_both_subtypes_include_mechanical_plans (test_policy_v15.PolicyTests.test_plan_both_subtypes_include_mechanical_plans) ... ok
+test_plan_subject_does_not_make_a_reply_action (test_policy_v15.PolicyTests.test_plan_subject_does_not_make_a_reply_action) ... ok
+test_state_plan_sending_and_dedup (test_policy_v15.PolicyTests.test_state_plan_sending_and_dedup) ... Model release unavailable; automatic 30s expiry remains configured
+Model release unavailable; automatic 30s expiry remains configured
+ok
+test_strange_response_requires_review (test_policy_v15.PolicyTests.test_strange_response_requires_review) ... ok
+test_uncited_evidence_and_80_percent_rejected (test_policy_v15.PolicyTests.test_uncited_evidence_and_80_percent_rejected) ... ok
+test_external_probe_script (test_python_gate.PythonGateTests.test_external_probe_script) ... ok
+test_python_probe_module_importable (test_python_gate.PythonGateTests.test_python_probe_module_importable) ... ok
+test_all_78_live_items_categories_and_no_sends (test_reconcile_v16.ReconcileTests.test_all_78_live_items_categories_and_no_sends) ... ok
+test_distinct_work_requests_not_equal_email_count (test_reconcile_v16.ReconcileTests.test_distinct_work_requests_not_equal_email_count) ... ok
+test_duplicate_entryid_rejected_before_report (test_reconcile_v16.ReconcileTests.test_duplicate_entryid_rejected_before_report) ... ok
+test_existing_sent_and_unknown_untouched (test_reconcile_v16.ReconcileTests.test_existing_sent_and_unknown_untouched) ... ok
+test_hamza_overrides_llm_outage_and_system_mail_not_forwarded (test_reconcile_v16.ReconcileTests.test_hamza_overrides_llm_outage_and_system_mail_not_forwarded) ... ok
+test_individual_detail_error_report_not_complete (test_reconcile_v16.ReconcileTests.test_individual_detail_error_report_not_complete) ... ok
+test_ai_failure_does_not_starve_later_hamza_and_one_ai_attempt (test_reliability.ReliabilityTests.test_ai_failure_does_not_starve_later_hamza_and_one_ai_attempt) ... Classification failed first
+Traceback (most recent call last):
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 163, in _scan
+    cls = ai.classify(msg['subject'], latest, context)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+RuntimeError: offline
+Classification failed third
+Traceback (most recent call last):
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 161, in _scan
+    raise RuntimeError('AI unavailable in this scan; deferred until retry')
+RuntimeError: AI unavailable in this scan; deferred until retry
+ok
+test_connection_refusal_recovers_then_retries_once (test_reliability.ReliabilityTests.test_connection_refusal_recovers_then_retries_once) ... ok
+test_heartbeat_independent_of_main_thread_and_stops (test_reliability.ReliabilityTests.test_heartbeat_independent_of_main_thread_and_stops) ... ok
+test_late_hamza_overrides_review_without_duplicate (test_reliability.ReliabilityTests.test_late_hamza_overrides_review_without_duplicate) ... ok
+test_model_request_has_finite_residency (test_reliability.ReliabilityTests.test_model_request_has_finite_residency) ... ok
+test_nonconnection_error_does_not_start_or_retry_ollama (test_reliability.ReliabilityTests.test_nonconnection_error_does_not_start_or_retry_ollama) ... ok
+test_old_plan_queue_reclassified_without_touching_sent_or_unknown (test_reliability.ReliabilityTests.test_old_plan_queue_reclassified_without_touching_sent_or_unknown) ... ok
+test_plan_plus_false_ei_claim_does_not_forward_mechanical_plan (test_reliability.ReliabilityTests.test_plan_plus_false_ei_claim_does_not_forward_mechanical_plan) ... ok
+test_release_even_after_failure_and_unchanged_messages_not_classified (test_reliability.ReliabilityTests.test_release_even_after_failure_and_unchanged_messages_not_classified) ... ok
+test_unknown_send_not_retried_after_restart (test_reliability.ReliabilityTests.test_unknown_send_not_retried_after_restart) ... UNKNOWN send outcome one
+Traceback (most recent call last):
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 79, in send_one
+    gw.forward(row['entry_id'], row['store_id'], RECIPIENT, token)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1204, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Project-Mailbox/app/tests/test_reliability.py", line 100, in ambiguous
+    raise RuntimeError('Disconnected after submission')
+RuntimeError: Disconnected after submission
+ok
+test_failure_is_reported_and_blocks_acceptance (test_role_knowledge.EvaluationTests.test_failure_is_reported_and_blocks_acceptance) ... ok
+test_identical_passed_report_reused_but_changed_model_is_tested (test_role_knowledge.EvaluationTests.test_identical_passed_report_reused_but_changed_model_is_tested) ... ok
+test_actual_model_request_receives_domain_relations (test_role_knowledge.KnowledgeTests.test_actual_model_request_receives_domain_relations) ... ok
+test_generic_item_procurement_or_bom_is_not_a_plan (test_role_knowledge.KnowledgeTests.test_generic_item_procurement_or_bom_is_not_a_plan) ... ok
+test_graph_has_valid_relations_and_aliases (test_role_knowledge.KnowledgeTests.test_graph_has_valid_relations_and_aliases) ... ok
+test_item_retrieves_plan_and_frequency_relations_with_bounded_context (test_role_knowledge.KnowledgeTests.test_item_retrieves_plan_and_frequency_relations_with_bounded_context) ... ok
+test_tasklist_and_strategy_requests_have_grounded_plan_scope (test_role_knowledge.KnowledgeTests.test_tasklist_and_strategy_requests_have_grounded_plan_scope) ... ok
+test_bad_model_decision_safe (test_rules.RuleTests.test_bad_model_decision_safe) ... ok
+test_ei_and_non_ei (test_rules.RuleTests.test_ei_and_non_ei) ... ok
+test_four_plan_subtypes_equal_confidence (test_rules.RuleTests.test_four_plan_subtypes_equal_confidence) ... ok
+test_hamza_exact_case_and_separators (test_rules.RuleTests.test_hamza_exact_case_and_separators) ... ok
+test_hamza_overrides_classification (test_rules.RuleTests.test_hamza_overrides_classification) ... ok
+test_newest_part_excludes_quoted_request (test_rules.RuleTests.test_newest_part_excludes_quoted_request) ... ok
+test_plan_status_no_action (test_rules.RuleTests.test_plan_status_no_action) ... ok
+test_reply_with_new_request_kept (test_rules.RuleTests.test_reply_with_new_request_kept) ... ok
+test_system_mail_even_when_hamza (test_rules.RuleTests.test_system_mail_even_when_hamza) ... ok
+test_context_saturation_requires_review_without_second_generation (test_semantic_agent.SemanticAgentTests.test_context_saturation_requires_review_without_second_generation) ... ok
+test_direct_instruction_for_other_party_can_be_understood_semantically (test_semantic_agent.SemanticAgentTests.test_direct_instruction_for_other_party_can_be_understood_semantically) ... ok
+test_disagreement_is_review_even_hamza_not_silent_acceptance (test_semantic_agent.SemanticAgentTests.test_disagreement_is_review_even_hamza_not_silent_acceptance) ... ok
+test_local_thread_memory_is_context_only_and_bounded (test_semantic_agent.SemanticAgentTests.test_local_thread_memory_is_context_only_and_bounded) ... ok
+test_model_cannot_set_its_own_verified_flag_or_override_recipient (test_semantic_agent.SemanticAgentTests.test_model_cannot_set_its_own_verified_flag_or_override_recipient) ... ok
+test_pipeline_records_semantic_action_and_no_duplicate_on_restart (test_semantic_agent.SemanticAgentTests.test_pipeline_records_semantic_action_and_no_duplicate_on_restart) ... ok
+test_signatures_and_quote_prefixes_are_not_new_action_evidence (test_semantic_agent.SemanticAgentTests.test_signatures_and_quote_prefixes_are_not_new_action_evidence) ... ok
+test_source_instructions_remain_json_data_and_no_unbounded_loop (test_semantic_agent.SemanticAgentTests.test_source_instructions_remain_json_data_and_no_unbounded_loop) ... ok
+test_truncated_message_does_not_get_an_unchecked_hamza_forward (test_semantic_agent.SemanticAgentTests.test_truncated_message_does_not_get_an_unchecked_hamza_forward) ... ok
+test_two_answers_cannot_ground_evidence_from_quoted_history (test_semantic_agent.SemanticAgentTests.test_two_answers_cannot_ground_evidence_from_quoted_history) ... ok
+test_unknown_plan_paraphrase_without_plan_keywords_can_pass (test_semantic_agent.SemanticAgentTests.test_unknown_plan_paraphrase_without_plan_keywords_can_pass) ... ok
+test_unknown_vocabulary_can_pass_two_semantic_assessments (test_semantic_agent.SemanticAgentTests.test_unknown_vocabulary_can_pass_two_semantic_assessments) ... ok
+test_historical_mail_immutable (test_state.PersistenceTests.test_historical_mail_immutable) ... ok
+test_reports_and_backup (test_state.PersistenceTests.test_reports_and_backup) ... ok
+test_single_send_dedup_even_after_restart (test_state.PersistenceTests.test_single_send_dedup_even_after_restart) ... ok
+test_work_items_group_by_thread_and_plan_target (test_state.PersistenceTests.test_work_items_group_by_thread_and_plan_target) ... ok
+test_disable_and_resume_close_sqlite_handles (test_upgrade_v15.UpgradeTests.test_disable_and_resume_close_sqlite_handles) ... ok
+test_stop_quarantine_persists_sends_and_resume (test_upgrade_v15.UpgradeTests.test_stop_quarantine_persists_sends_and_resume) ... ok
+test_confirmation_failure_stays_unknown (test_v20_delivery.DeliveryV20.test_confirmation_failure_stays_unknown) ... UNKNOWN send outcome test
+Traceback (most recent call last):
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 82, in send_one
+    if gw.sent_copy_exists(token):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+OSError: COM lost
+ok
+test_cooperative_stop_does_not_start_a_scan (test_v20_delivery.DeliveryV20.test_cooperative_stop_does_not_start_a_scan) ... ok
+test_csv_source_text_cannot_be_formula (test_v20_delivery.DeliveryV20.test_csv_source_text_cannot_be_formula) ... ok
+test_fsync_durability (test_v20_delivery.DeliveryV20.test_fsync_durability) ... ok
+test_local_ollama_bypasses_external_proxy (test_v20_delivery.DeliveryV20.test_local_ollama_bypasses_external_proxy) ... ok
+test_monthly_report_keeps_unconfirmed_submission (test_v20_delivery.DeliveryV20.test_monthly_report_keeps_unconfirmed_submission) ... ok
+test_receipt_required_and_activation_can_resume_without_second_send (test_v20_delivery.DeliveryV20.test_receipt_required_and_activation_can_resume_without_second_send) ... ok
+test_submission_not_sent_until_copy_confirmed (test_v20_delivery.DeliveryV20.test_submission_not_sent_until_copy_confirmed) ... ok
+test_submitted_restart_never_resends (test_v20_delivery.DeliveryV20.test_submitted_restart_never_resends) ... ok
+test_inaccessible_mounted_inbox_fails_without_claiming_success (test_visible_inbox_v161.VisibleInboxTests.test_inaccessible_mounted_inbox_fails_without_claiming_success) ... ok
+test_missing_mount_must_not_do_server_lookup (test_visible_inbox_v161.VisibleInboxTests.test_missing_mount_must_not_do_server_lookup) ... ok
+test_retry_temporary_com_error_without_login (test_visible_inbox_v161.VisibleInboxTests.test_retry_temporary_com_error_without_login) ... ok
+test_reusing_snapshot_no_second_lookups_or_sends (test_visible_inbox_v161.VisibleInboxTests.test_reusing_snapshot_no_second_lookups_or_sends) ... ok
+test_uses_only_visible_store_no_recipient_resolve_or_logon (test_visible_inbox_v161.VisibleInboxTests.test_uses_only_visible_store_no_recipient_resolve_or_logon) ... ok
+
+----------------------------------------------------------------------
+Ran 95 tests in 0.332s
+
+OK
+NORMAL_FORWARDING_DISABLED; previous_approval=1
+FORWARDING=ENABLED
+NORMAL_FORWARDING_DISABLED; previous_approval=1
+NORMAL_FORWARDING_DISABLED; previous_approval=1
+BACKUP_VERIFIED=/tmp/tmpzy90jgz4/data/backups/policy_v15_20261016-064656-410471.db
+{"historical_unsent_quarantined": 1, "historical_ambiguous_no_retry": 1, "normal_queued_for_reclassification": 1, "historical_unscanned_blocked": 1}
+HISTORICAL_AUDIT_CSV=/tmp/tmpzy90jgz4/data/historical_v15_previous_forwards_AUDIT.csv
+FORWARDING=ENABLED
+Controleer verplichte controles...
+{}
+
+Testbericht: EE-AGENT-TEST
+Ontvangen: 2026-10-08T08:00:00+00:00 / categories: Hamza
+Doeladres: hamza.elmakhtari@kuraray.com
+Na bevestiging wordt precies EEN echte Outlook-forward verstuurd.
+Outlook accepteerde de forward; controle op verzonden kopie...
+Controleer verplichte controles...
+{}
+
+Testbericht: EE-AGENT-TEST
+Ontvangen: 2026-10-08T08:00:00+00:00 / categories: Hamza
+Doeladres: hamza.elmakhtari@kuraray.com
+Na bevestiging wordt precies EEN echte Outlook-forward verstuurd.
+Outlook accepteerde de forward; controle op verzonden kopie...
+
+Forwarding = ENABLED. De achtergrondagent krijgt direct een nieuwe scan-trigger.
+
+test_corrupt_runtime_does_not_claim_ready (test_readiness.ReadinessTests.test_corrupt_runtime_does_not_claim_ready) ... ok
+test_missing_runtime_waits_without_stderr (test_readiness.ReadinessTests.test_missing_runtime_waits_without_stderr) ... ok
+test_pending_then_success_and_error_remains_not_ready (test_readiness.ReadinessTests.test_pending_then_success_and_error_remains_not_ready) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.131s
+
+OK

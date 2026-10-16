@@ -1,4 +1,4 @@
-# Rolkennis 1.9.0
+# Rolkennis 2.0.0
 
 EE-Reliability: E&I-werk en SAP PM-onderhoudsplanning
 
@@ -36,3 +36,4 @@ De voorbeelden zijn geen gesloten whitelist. Semantisch onderbouwde herkenning
 van nieuwe termen kan de lexicale controle overrulen na twee overeenstemmende
 beoordelingen met bewijs, eigenaar en timing. Beide beoordelingen gebruiken
 hetzelfde model, dus kunnen dezelfde fout maken.
+
