@@ -1,4 +1,4 @@
-Linux-cloudtest, 16 oktober 2026. Gesimuleerde AI/Outlook, geen echte mail.
+Linux-cloudtest: testversie met uurcyclus; gesimuleerde AI/Outlook, geen echte mail.
 
 test_completed_claim_with_direct_new_request_requires_review (test_completion.CompletionTests.test_completed_claim_with_direct_new_request_requires_review) ... ok
 test_completed_even_with_hamza_model_checked_no_send_or_work_item (test_completion.CompletionTests.test_completed_even_with_hamza_model_checked_no_send_or_work_item) ... ok
@@ -154,16 +154,16 @@ test_reusing_snapshot_no_second_lookups_or_sends (test_visible_inbox_v161.Visibl
 test_uses_only_visible_store_no_recipient_resolve_or_logon (test_visible_inbox_v161.VisibleInboxTests.test_uses_only_visible_store_no_recipient_resolve_or_logon) ... ok
 
 ----------------------------------------------------------------------
-Ran 95 tests in 0.332s
+Ran 95 tests in 0.275s
 
 OK
 NORMAL_FORWARDING_DISABLED; previous_approval=1
 FORWARDING=ENABLED
 NORMAL_FORWARDING_DISABLED; previous_approval=1
 NORMAL_FORWARDING_DISABLED; previous_approval=1
-BACKUP_VERIFIED=/tmp/tmpzy90jgz4/data/backups/policy_v15_20261016-064656-410471.db
+BACKUP_VERIFIED=/tmp/tmphjr00vi9/data/backups/policy_v15_20261016-065309-692696.db
 {"historical_unsent_quarantined": 1, "historical_ambiguous_no_retry": 1, "normal_queued_for_reclassification": 1, "historical_unscanned_blocked": 1}
-HISTORICAL_AUDIT_CSV=/tmp/tmpzy90jgz4/data/historical_v15_previous_forwards_AUDIT.csv
+HISTORICAL_AUDIT_CSV=/tmp/tmphjr00vi9/data/historical_v15_previous_forwards_AUDIT.csv
 FORWARDING=ENABLED
 Controleer verplichte controles...
 {}
@@ -189,6 +189,6 @@ test_missing_runtime_waits_without_stderr (test_readiness.ReadinessTests.test_mi
 test_pending_then_success_and_error_remains_not_ready (test_readiness.ReadinessTests.test_pending_then_success_and_error_remains_not_ready) ... ok
 
 ----------------------------------------------------------------------
-Ran 3 tests in 0.131s
+Ran 3 tests in 0.128s
 
 OK

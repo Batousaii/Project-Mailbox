@@ -65,7 +65,7 @@ Ondertekeningen en >-quotes worden gescheiden van de actuele boodschap.
 Een ontbrekende bijlage of te veel context leidt tot review, niet tot een
 verzonnen conclusie. review_queue.csv toont redenen, eigenaar en timing.
 
-Normale cyclus 12 uur; ongewijzigde verwerkte mails krijgen geen nieuwe
+Testcyclus 1 uur; ongewijzigde verwerkte mails krijgen geen nieuwe
 AI-beoordeling. De kennislaag gebruikt alleen lokale JSON en standaard-Python,
 zonder embeddingmodel, vectorservice of tweede LLM. Het Qwen-model krijgt
 30 seconden residency en een unload-verzoek na de batch. Foutbackoff is

@@ -1,4 +1,4 @@
-# EE-Reliability 2.0.0
+# EE-Reliability 2.0.0 — testversie (elk uur)
 
 Windows-agent voor klassieke Outlook, gedeelde Inbox EE-Reliability en lokale Ollama qwen3:4b.
 Gebaseerd op de bestaande 1.9.0-code en de ontwerpnotities van 15 oktober 2026 op
@@ -26,7 +26,7 @@ Voor nieuwe installatie maakt de installer een eigen venv, start een bestaande O
 downloadt het ontbrekende model en test echte generatie/COM/mailbox/modeluitkomsten vóór baseline/startup.
 Ontbrekende Python/Ollama-installaties worden niet blind vervangen: er volgt een herstelmelding.
 Geen adminrechten, nieuwe Exchange-aanmelding of wijzigingen aan originele mailboxitems.
-De PC moet aan en de gebruiker aangemeld blijven voor de 12-uurscyclus.
+De PC moet aan en de gebruiker aangemeld blijven voor de uurcyclus.
 
 ## Wat 2.0 behoudt en verbetert
 
@@ -62,6 +62,9 @@ Data, app/venv, Python, Outlook en Ollama blijven beschikbaar. Historisch geërf
 blind verwijderd; bij een upgrade moeten die apart gecontroleerd worden.
 
 **Validatie hier:** 95 agenttests en 3 updatertests slagen op Linux. Tests gebruiken gesimuleerde AI/Outlook.
-Windows PowerShell, echte modelkwaliteit, Outlook-forwarding en een 12-uurs-/loginproef zijn hier niet uitgevoerd.
+Windows PowerShell, echte modelkwaliteit, Outlook-forwarding en een uur-/loginproef zijn hier niet uitgevoerd.
 Dit is een gebouwde 2.0-kandidaat, nog geen bewezen operationele oplevering op de doel-pc.
 Zie ACCEPTATIE-2.0.md en TESTRESULTATEN-2.0.txt.
+
+Deze testversie controleert direct na starten en vervolgens elk uur na de vorige succesvolle scan.
+STATUS.bat toont scan_interval_minutes: 60. Foutretries blijven eerder plaatsvinden.

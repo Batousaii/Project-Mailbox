@@ -89,6 +89,8 @@ def status(st):
         checks['last_full_mailbox_audit'] = 'NOT_COMPLETED'
     checks.update({
         'integrated_audit_version': '2.0.0',
+        'scan_interval_minutes': 60,
+        'release_mode': 'TEST - hourly mailbox check',
         'forwarding_policy_version': POLICY_VERSION,
         'baseline': st.setting('baseline_completed','0') == '1',
         'historical_count': st.counts().get('HISTORICAL_IGNORE', 0),

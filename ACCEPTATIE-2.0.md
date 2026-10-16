@@ -28,7 +28,7 @@ De 21 echte Qwen-cases zijn hier niet uitgevoerd; UPDATE/INSTALL voert ze op de 
 7. RE met nieuw verzoek, oude quotes, SAP PM-periodiciteit, rol/eigenaar en timing: representatieve NL/EN-mailset.
 8. Crash rond Send: UNKNOWN/SUBMITTED zichtbaar, geen dubbele mail na restart; reconciliatie naar SENT testen.
 9. UPDATE: goedkeuring en EntryIDs behouden; precies één worker en nieuwe succesvolle scan; code-rollback zonder DB-rollback.
-10. Loginstart en volgende 12-uurscyclus zonder handwerk; Ollama-/Outlook-herstel, logboek en maandcontrole.
+10. Loginstart en volgende uurcyclus zonder handwerk; Ollama-/Outlook-herstel, logboek en maandcontrole.
 11. Schone INSTALL, START/STOP/UNINSTALL en PowerShell-organisatiebeleid. Die scripts zijn hier niet op Windows uitgevoerd.
 
 Verdere grenzen: bijlagen/SAP worden niet gelezen; zelfgerapporteerde confidence is niet gekalibreerd;

@@ -1,4 +1,4 @@
-"""Foreground/hidden background agent. Single-instance mutex, 12 h cycle, recoverable errors."""
+"""Foreground/hidden background agent. Single-instance mutex, 1 h test cycle, recoverable errors."""
 import ctypes
 import datetime as dt
 import json
@@ -17,7 +17,7 @@ from .state import State, data_dir, utc_now
 from .role_knowledge import load as role_knowledge, matches as role_matches
 
 LOG = logging.getLogger('ee_reliability')
-SCAN_INTERVAL = 12 * 3600
+SCAN_INTERVAL = 3600  # Testversie: controle elk uur na een geslaagde scan.
 ERROR_RETRY = 15 * 60
 
 
