@@ -1,4 +1,4 @@
-Linux-cloudtest: testversie met uurcyclus; gesimuleerde AI/Outlook, geen echte mail.
+Correctie Windows-loghandle; uurcyclus behouden. Linux-hercontrole met gesimuleerde AI/Outlook; Windows-update opnieuw testen.
 
 test_completed_claim_with_direct_new_request_requires_review (test_completion.CompletionTests.test_completed_claim_with_direct_new_request_requires_review) ... ok
 test_completed_even_with_hamza_model_checked_no_send_or_work_item (test_completion.CompletionTests.test_completed_even_with_hamza_model_checked_no_send_or_work_item) ... ok
@@ -47,7 +47,7 @@ test_hamza_overrides_llm_outage_and_system_mail_not_forwarded (test_reconcile_v1
 test_individual_detail_error_report_not_complete (test_reconcile_v16.ReconcileTests.test_individual_detail_error_report_not_complete) ... ok
 test_ai_failure_does_not_starve_later_hamza_and_one_ai_attempt (test_reliability.ReliabilityTests.test_ai_failure_does_not_starve_later_hamza_and_one_ai_attempt) ... Classification failed first
 Traceback (most recent call last):
-  File "/workspace/Project-Mailbox/app/agent/runner.py", line 163, in _scan
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 173, in _scan
     cls = ai.classify(msg['subject'], latest, context)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
@@ -61,7 +61,7 @@ Traceback (most recent call last):
 RuntimeError: offline
 Classification failed third
 Traceback (most recent call last):
-  File "/workspace/Project-Mailbox/app/agent/runner.py", line 161, in _scan
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 171, in _scan
     raise RuntimeError('AI unavailable in this scan; deferred until retry')
 RuntimeError: AI unavailable in this scan; deferred until retry
 ok
@@ -75,7 +75,7 @@ test_plan_plus_false_ei_claim_does_not_forward_mechanical_plan (test_reliability
 test_release_even_after_failure_and_unchanged_messages_not_classified (test_reliability.ReliabilityTests.test_release_even_after_failure_and_unchanged_messages_not_classified) ... ok
 test_unknown_send_not_retried_after_restart (test_reliability.ReliabilityTests.test_unknown_send_not_retried_after_restart) ... UNKNOWN send outcome one
 Traceback (most recent call last):
-  File "/workspace/Project-Mailbox/app/agent/runner.py", line 79, in send_one
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 89, in send_one
     gw.forward(row['entry_id'], row['store_id'], RECIPIENT, token)
   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
     return self._mock_call(*args, **kwargs)
@@ -126,7 +126,7 @@ test_disable_and_resume_close_sqlite_handles (test_upgrade_v15.UpgradeTests.test
 test_stop_quarantine_persists_sends_and_resume (test_upgrade_v15.UpgradeTests.test_stop_quarantine_persists_sends_and_resume) ... ok
 test_confirmation_failure_stays_unknown (test_v20_delivery.DeliveryV20.test_confirmation_failure_stays_unknown) ... UNKNOWN send outcome test
 Traceback (most recent call last):
-  File "/workspace/Project-Mailbox/app/agent/runner.py", line 82, in send_one
+  File "/workspace/Project-Mailbox/app/agent/runner.py", line 92, in send_one
     if gw.sent_copy_exists(token):
        ^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
@@ -154,16 +154,16 @@ test_reusing_snapshot_no_second_lookups_or_sends (test_visible_inbox_v161.Visibl
 test_uses_only_visible_store_no_recipient_resolve_or_logon (test_visible_inbox_v161.VisibleInboxTests.test_uses_only_visible_store_no_recipient_resolve_or_logon) ... ok
 
 ----------------------------------------------------------------------
-Ran 95 tests in 0.275s
+Ran 95 tests in 0.359s
 
 OK
 NORMAL_FORWARDING_DISABLED; previous_approval=1
 FORWARDING=ENABLED
 NORMAL_FORWARDING_DISABLED; previous_approval=1
 NORMAL_FORWARDING_DISABLED; previous_approval=1
-BACKUP_VERIFIED=/tmp/tmphjr00vi9/data/backups/policy_v15_20261016-065309-692696.db
+BACKUP_VERIFIED=/tmp/tmpiyiqy579/data/backups/policy_v15_20261016-070730-732915.db
 {"historical_unsent_quarantined": 1, "historical_ambiguous_no_retry": 1, "normal_queued_for_reclassification": 1, "historical_unscanned_blocked": 1}
-HISTORICAL_AUDIT_CSV=/tmp/tmphjr00vi9/data/historical_v15_previous_forwards_AUDIT.csv
+HISTORICAL_AUDIT_CSV=/tmp/tmpiyiqy579/data/historical_v15_previous_forwards_AUDIT.csv
 FORWARDING=ENABLED
 Controleer verplichte controles...
 {}
@@ -189,6 +189,6 @@ test_missing_runtime_waits_without_stderr (test_readiness.ReadinessTests.test_mi
 test_pending_then_success_and_error_remains_not_ready (test_readiness.ReadinessTests.test_pending_then_success_and_error_remains_not_ready) ... ok
 
 ----------------------------------------------------------------------
-Ran 3 tests in 0.128s
+Ran 3 tests in 0.178s
 
 OK

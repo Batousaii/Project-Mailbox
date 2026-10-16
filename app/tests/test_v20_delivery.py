@@ -7,7 +7,7 @@ from unittest.mock import patch
 from test_pipeline import FakeGateway
 from agent.state import State
 from agent.rules import Decision
-from agent.runner import baseline,send_one,reconcile,daemon
+from agent.runner import baseline,send_one,reconcile,daemon,configure_log,LOG
 from agent.cli import activate
 from agent import ai
 
@@ -70,8 +70,15 @@ class DeliveryV20(unittest.TestCase):
     def test_cooperative_stop_does_not_start_a_scan(self):
         self.st.close();self.st=State(self.temp.name)
         (self.st.root/'stop.request').touch()
-        with patch('agent.runner.State',side_effect=lambda root=None:State(self.temp.name)),patch('agent.runner.instance_mutex',return_value=None),patch('agent.runner.scan') as scan:
+        streams=[]
+        def capture_log(root):
+            configure_log(root)
+            streams.extend(h.stream for h in LOG.handlers if getattr(h,'ee_agent_owned',False))
+        with patch('agent.runner.State',side_effect=lambda root=None:State(self.temp.name)),patch('agent.runner.instance_mutex',return_value=None),patch('agent.runner.configure_log',side_effect=capture_log),patch('agent.runner.scan') as scan:
             daemon();scan.assert_not_called()
+        self.assertTrue(streams,'Real log file must be opened for this regression')
+        self.assertTrue(all(stream.closed for stream in streams),'Daemon must release log handles before returning')
+        self.assertFalse(any(getattr(h,'ee_agent_owned',False) for h in LOG.handlers))
         self.assertFalse((self.st.root/'runtime.json').exists())
     def test_local_ollama_bypasses_external_proxy(self):
         with patch('agent.ai.urllib.request.ProxyHandler') as proxy,patch('agent.ai.urllib.request.build_opener') as opener:

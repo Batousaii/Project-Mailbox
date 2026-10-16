@@ -28,7 +28,17 @@ def configure_log(root):
         LOG.setLevel(logging.INFO)
         h = RotatingFileHandler(root / 'agent.log', maxBytes=4_000_000, backupCount=4, encoding='utf-8')
         h.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+        h.ee_agent_owned = True
         LOG.addHandler(h)
+
+
+def close_log():
+    # Windows cannot remove/replace a directory while its log stream is open.
+    # Close only the file handlers created by this agent, not caller handlers.
+    for handler in list(LOG.handlers):
+        if getattr(handler, 'ee_agent_owned', False):
+            LOG.removeHandler(handler)
+            handler.close()
 
 
 def heartbeat(st, detail=''):
@@ -307,9 +317,14 @@ def daemon():
         stop.set()
         worker.join(timeout=50)
         try:
-            (st.root/'runtime.json').unlink(missing_ok=True)
+            try:
+                (st.root/'runtime.json').unlink(missing_ok=True)
+            finally:
+                st.close()
         finally:
-            st.close()
-        if mutex:
-            close_mutex(mutex)
+            try:
+                if mutex:
+                    close_mutex(mutex)
+            finally:
+                close_log()
 

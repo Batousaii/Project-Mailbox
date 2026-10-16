@@ -36,3 +36,10 @@ hetzelfde model tweemaal raadplegen is geen onafhankelijke waarheid; Sent Items 
 Geërfde 1.x-SENT-statussen behouden hun eerdere betekenis. Het apparaat moet aan en aangemeld zijn.
 De maandcontrole toetst bekende onopgeloste berichten, niet alle mogelijke AI-foutnegatieven.
 Zonder lokale resultaten en actieve scheduler/forwarding is de oorspronkelijke harde oplevereis nog open.
+
+Windows-test van gebruiker: update blokkeerde vóór codewissel op WinError 32 bij
+verwijderen van de tijdelijke agent.log in de stoptest. Oorzaak: daemon liet zijn
+RotatingFileHandler open. Correctie: eigen loghandlers sluiten en verwijderen
+bij daemon-einde, ook bij cleanup-fouten. Regressie controleert nu expliciet
+dat de daadwerkelijk geopende logstreams gesloten zijn. Linux-hercontrole slaagt;
+herhaling van de Windows-update blijft nodig.
